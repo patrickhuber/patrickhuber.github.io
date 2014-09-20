@@ -10,12 +10,13 @@ when service contracts are designed in an inconsistent way.
 
 For example, there are many ways to say "Return a Product". You might write something like this:
 
-```
-Product GetProduct(int id)
+```CSharp
+Product GetProduct(int id);
 ``` 
 
 What if you want to fetch a product by Name? Time to add another method. We don't want to be unclear about how to fetch a product, so we better describe what the product method is using as criteria.
-```
+
+```CSharp
 Product GetProductById(int id);
 Product GetProductByName(string name);
 ```
