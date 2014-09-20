@@ -12,6 +12,7 @@ There are several Verbs that can describe an operation to a resource. You can us
 
 For example, there are many ways to say "Return a Product". You might write something like this:
 
+### Canonical Expression Simple Example
 ```CSharp
 Product GetProduct(int id);
 ``` 
