@@ -16,6 +16,11 @@ For example, there are many ways to say "Return a Product". You might write some
 Product GetProduct(int id);
 ``` 
 
+The pattern is {Action}{Resource}({Identifier}). So for our example above, we have:
+*  {Action} = Get
+*  {Resource} = Product
+*  {Identifier} = id
+
 What if you want to fetch a product by Name? Time to add another method. We don't want to be unclear about how to fetch a product, so we better describe what the product method is using as criteria.
 
 ```CSharp
