@@ -12,7 +12,7 @@ There are several Verbs that can describe an operation to a resource. You can us
 
 For example, there are many ways to say "Return a Product". You might write something like this:
 
-### Canonical Expression Simple Example
+#### A Simple Method Example
 ```CSharp
 Product GetProduct(int id);
 ``` 
@@ -24,6 +24,7 @@ The pattern is {Action}{Resource}({Identifier}). So for our example above, we ha
 
 This type of Tokenized approach to Service operations can be extended to any resource and any operation. You could define a GetPerson method with an id parameter or a GetCategory method with an id parameter. The important part is to remain consistent.
 
+#### A More Complex Method Example
 What if you want to fetch a product by Name? Time to add another method. We don't want to be unclear about how to fetch a product, so we better describe what the product method is using as criteria.
 
 ```CSharp
@@ -45,6 +46,7 @@ Product GetProductByName(int name)
 *  {Property} = Name
 *  {Identifier} = name
 
+#### An Example with Relationships
 What if you want to fetch a product by related products or fetch products and their related products? We typically add more methods.
 
 ```CSharp
