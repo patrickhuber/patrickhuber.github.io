@@ -5,13 +5,26 @@ Service contracts are a critical part of a service's ability to communicate its 
 For this reason, time and care should be given to the contract design. 
 
 ## Canonical Expression
-[Canonical Expression](http://soapatterns.org/design_patterns/canonical_expression) defines a pattern meant to address the chaos and sprawl that can occur
-when service contracts are designed in an inconsistent way. The whole idea behind this pattern comes down to standardizing your contracts so that when you try to perform an action against a resource, you do it in a consistent way. 
+[Canonical Expression](http://soapatterns.org/design_patterns/canonical_expression) defines 
+a pattern meant to address the chaos and sprawl that can occur when service contracts are designed in an inconsistent way. 
+The whole idea behind this pattern comes down to standardizing your contracts so that when you try to perform an action against a resource, you do it in a consistent way. 
 
 ## Canonical Expression with Reading Data
-There are several Verbs that can describe an operation to a resource. You can use the words "GET", "FETCH", "READ", "QUERY", etc. All with similar meeting. The most common word  you see for service operations that fetch information is "Get".
+There are several Verbs that can describe an operation to a resource. You can use the words "GET", "FETCH", "READ", "QUERY", etc. 
+All with similar meeting. The most common word  you see for service operations that fetch information is "Get".
 
 For example, there are many ways to say "Return a Product". You might write something like this:
+
+## First, Our Model
+```CSharp
+public class Product
+{
+    public int Id {get;set;}
+    public string Name {get;set;}
+    public string Description {get;set;}    
+}
+
+```
 
 #### A Simple Method Example
 ```CSharp
@@ -23,10 +36,13 @@ The pattern is {Action}{Resource}({Identifier}). So for our example above, we ha
 *  {Resource} = Product
 *  {Identifier} = id
 
-This type of Tokenized approach to Service operations can be extended to any resource and any operation. You could define a GetPerson method with an id parameter or a GetCategory method with an id parameter. The important part is to remain consistent.
+This type of Tokenized approach to Service operations can be extended to any resource and any operation. 
+We could define a GetPerson method with an id parameter or a GetCategory method with an id parameter. 
+The important part is to remain consistent.
 
 #### A More Complex Method Example
-What if you want to fetch a product by Name? Time to add another method. We don't want to be unclear about how to fetch a product, so we better describe what the product method is using as criteria.
+What if you want to fetch a product by Name? Time to add another method. 
+We don't want to be unclear about how to fetch a product, so we better describe what the product method is using as criteria.
 
 ```CSharp
 Product GetProductById(int id);
@@ -48,17 +64,20 @@ Product GetProductByName(int name)
 *  {Identifier} = name
 
 #### An Example with Relationships
-What if you want to fetch a product by related products or fetch products and their related products? We typically add more methods. Now we need to start representing the return types as lists. 
+What if you want to fetch a product by related products or fetch products and their related products? 
+We typically add more methods. Now we need to start representing the return types as lists. 
 
 ```CSharp
 Product GetProductById(int id);
 Product GetProductByName(string name);
-ICollection<Product> GetProductListByRelatedProductId(int id);
-Product GetProductByIdIncludeRelatedProducts(int id);
+ICollection<Product> GetProductListByManufacturerId(int id);
+Product GetProductByIdIncludeManufacturer(int id);
 ```
 
 #### Welcome to method sprawl
-At this point it becomes clear that we have a large number of methods that all do some form of query on a Product resource. We will revisit reads in a later in the post, but first lets look at Commands such as Updates, Creates and Deletes
+At this point it becomes clear that we have a large number of methods that all do some form of 
+query on a Product resource. When we add additional expressions, we have to add additional methods. 
+We will revisit reads in a later in the post, but first lets look at Commands such as Updates, Creates and Deletes
 
 ## Canonical Expression with Modifying State
 Why say "Modifying State" vs Create, Update, Delete? 
@@ -69,4 +88,27 @@ The resource store is the location where the state is retained.
 
 What side effects does a Read or Get operation have? The answer is supposed to be 'None'.
 
-Because query (read) and command(create, update, delete) operations have such a clear seperation, a pattern emerged to describe their relationship called Command Query Response Segregation [(CQRS)](http://martinfowler.com/bliki/CQRS.html)
+Because query (read) and command(create, update, delete) operations have such a clear seperation, 
+a pattern emerged to describe their relationship called 
+Command Query Response Segregation [(CQRS)](http://martinfowler.com/bliki/CQRS.html)
+
+
+
+### Simple Create, Update and Delete examples
+Lets take a simple approach to modifying a Product may take the form of the following.
+
+```CSharp
+void CreateProduct(Product product);
+void DeleteProduct(int id);
+void UpdateProduct(Product product);
+```
+
+In the examples above, all of the methods take in the same product object with the exception of the Delete operation. 
+One glaring issue with this approach is the fact that creating an Entity and updating an Entity can sometimes take different data contracts. 
+
+What will occur if the Description field on the Product object is nullable? If we want to update the product, but not change the description, I need to echo back every field. 
+For small objects this can seem trivial, but for large object sets sending back a large message when we only want to change a few fields is a bit overkill. 
+Also, what do we do for batch operations? With the current contracts, several calls to the same method must be called over and over again.
+
+## Canonical Expression Inspiration
+So we expressed a few concerns above. 
