@@ -219,13 +219,12 @@ WCF and SOAP services by nature tend to fall into the second category of limited
 Because of this categorization, we will need to standardize a format expressiveness.
 
 ### Request / Reply
-Following a 'one model in, one model out' philosophy. 
-This will manifest as a Request object and a Response object.
+Following a 'one model in, one model out' philosophy manifests as a Request object and a Response object.
 Because the action on the resource is a Read operation (CRUD), we will name the request and reply with this information as well.
 
 Data Contracts
 ```CSharp
-public ProductReadRequest
+public class ProductReadRequest
 {
 	public ICollection<ProductReadCriteria> Where{get;set;}
 	public ProductExpand Expand {get;set;}
@@ -242,7 +241,7 @@ public class ProductExpand
 	public bool Manufacturer{get;set;}
 }
 
-public ProductReadResponse
+public class ProductReadResponse
 {
 	public ICollection<Product> Products{get;set;}
 }
@@ -255,3 +254,4 @@ public interface ProductService
 	ProductReadResponse Read(ProductReadRequest request);
 }
 ```
+
