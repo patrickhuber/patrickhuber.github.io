@@ -223,10 +223,35 @@ Following a 'one model in, one model out' philosophy.
 This will manifest as a Request object and a Response object.
 Because the action on the resource is a Read operation (CRUD), we will name the request and reply with this information as well.
 
+Data Contracts
 ```CSharp
 public ProductReadRequest
-{}
+{
+	public ICollection<ProductReadCriteria> Where{get;set;}
+	public ProductExpand Expand {get;set;}
+}
+
+public class ProductReadCriteria
+{
+	public int? Id{get;set;}
+	public string Name{get;set;}
+}
+
+public class ProductExpand
+{
+	public bool Manufacturer{get;set;}
+}
 
 public ProductReadResponse
-{}
+{
+	public ICollection<Product> Products{get;set;}
+}
+```
+
+Service Interface
+```CSharp
+public interface ProductService
+{
+	ProductReadResponse Read(ProductReadRequest request);
+}
 ```
