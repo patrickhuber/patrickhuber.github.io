@@ -21,9 +21,16 @@ public class Product
 {
     public int Id {get;set;}
     public string Name {get;set;}
-    public string Description {get;set;}    
+    public string Description {get;set;}  
+	public Manufacturer Manufacturer {get;set;}
 }
 
+public class Manufacturer
+{
+	public int Id {get;set;}
+	public string Name{get;set;}
+	public ICollection<Product> Products{get;set;}
+}
 ```
 
 #### A Simple Method Example
@@ -92,8 +99,6 @@ Because query (read) and command(create, update, delete) operations have such a 
 a pattern emerged to describe their relationship called 
 Command Query Response Segregation [(CQRS)](http://martinfowler.com/bliki/CQRS.html)
 
-
-
 ### Simple Create, Update and Delete examples
 Lets take a simple approach to modifying a Product may take the form of the following.
 
@@ -111,4 +116,50 @@ For small objects this can seem trivial, but for large object sets sending back 
 Also, what do we do for batch operations? With the current contracts, several calls to the same method must be called over and over again.
 
 ## Canonical Expression Inspiration
-So we expressed a few concerns above. 
+So we expressed a few capabilities above which are summarized here:
+* Read operations should handle multiple criteria
+* Read operations should fetch related entities
+* Read operations could return one or more entities (a set of one is still a set)
+
+### What can we learn from databases?
+A simple T-SQL example will show that the expressions above can be expressed in relative ease. For example, assume we have the following DDL.
+
+```SQL
+CREATE TABLE PRODUCTS
+(
+	Id int not null identity(1,1),
+	Name varchar(100) not null,
+	Description varchar(1000) not null,
+	ManufacturerId int not null
+)
+
+CREATE TABLE MANUFACTURERS
+(
+	Id int not null identity(1,1),
+	Name varchar(100) not null,
+	Description varchar(1000) not null
+)
+```
+
+For simplicity sake, the schema above represents the same structure as our domain model. Running over the list of capabilities, lets see what we can accomplish with sql select statements.
+
+```SQL
+-- select by id
+-- returns single entity
+SELECT *
+FROM PRODUCTS
+WHERE Id = 12345
+
+-- select by name
+SELECT *
+FROM PRODUCTS
+WHERE Name = 'grapes'
+
+-- select multiple criteria
+-- returns multiple entities
+SELECT *
+FROM PRODUCTS
+WHERE Name = 'grapes' OR Name = 'apples'
+```
+
+### What can we learn from the OData standard?
