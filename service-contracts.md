@@ -160,6 +160,73 @@ WHERE Name = 'grapes'
 SELECT *
 FROM PRODUCTS
 WHERE Name = 'grapes' OR Name = 'apples'
+
+-- select entity, expand relationship
+SELECT *
+FROM PRODUCTS p
+INNER JOIN MANUFACTURERS m
+	on m.Id = p.ManufacturerId
+WHERE Id = 12345
 ```
 
+SQL is very expressive and allows us to accomplish the operations with relative ease and with very terse expressions. 
+The functional and set based nature of SQL can be an inspiration when we are creating a more robust data contract. 
+The important piece is to think about resources as sets.
+
 ### What can we learn from the OData standard?
+[OData](http://www.odata.org/) is an OASIS standard for data representation over HTTP. 
+It takes the concept of resources, and applies standardized expressions over those resources.
+Think of it like REST with a very strict standard.
+ 
+Much like SQL, OData is very expressive and is functional in nature.
+
+Using the capabilities above, and assume the Product and Manufacturer class models are now applied as serialized JSON objects.
+
+select by id
+```
+GET svcroot/Products(12345)
+```
+
+select by name
+```
+GET svcroot/Products?$filter=Name eq 'grapes'
+```
+
+select multiple criteria
+```
+GET svcroot/Products?$filter=Name eq 'grapes' or Name eq 'apples'
+```
+
+select entity expand relationship
+```
+GET svcroot/Products(12345)?$expand=Manufacturer
+```
+
+### Pros and cons of SQL and OData
+OData and SQL are very expressive, however there is a cost to this expressiveness. 
+Allowing any expression to hit the repository can cause performance impacts. 
+Stored procedures and Strong unitized data contracts have always been a great way to isolate paths into the database to allow for better tuning and optimization.
+
+So there are tradeoffs:
+
+1. You can have a very expressive data contract and attempt to blacklist (exclude) expressions that are not allowed
+OR
+2. You can have a limited expressive data contract and whitelist (create) expressions that are allowed.
+
+### The approach for WCF
+In the section above we expressed the tradeoffs between expression and control. 
+WCF and SOAP services by nature tend to fall into the second category of limited expressiveness. 
+Because of this categorization, we will need to standardize a format expressiveness.
+
+### Request / Reply
+Following a 'one model in, one model out' philosophy. 
+This will manifest as a Request object and a Response object.
+Because the action on the resource is a Read operation (CRUD), we will name the request and reply with this information as well.
+
+```CSharp
+public ProductReadRequest
+{}
+
+public ProductReadResponse
+{}
+```
