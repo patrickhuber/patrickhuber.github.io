@@ -2,6 +2,7 @@
 layout: post
 title: Designing Enterprise Class Service Contracts
 ---
+
 ## Overview
 Service contracts are a critical part of a service's ability to communicate its capability to consumers.  
 For this reason, time and care should be given to the contract design. 

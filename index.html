@@ -2,10 +2,12 @@
 layout: post
 title: welcome to patrick huber's blog
 ---
-<ul>
-	{% for post in site.posts %}
-	<li>
-	  <a href="{{ post.url }}">{{ post.title }}</a>
-	</li>
-	{% endfor %}
-</ul>
+<div class="">
+	<ul>
+		{% for post in site.posts %}
+		<li>
+		  <a href="{{ post.url }}">{{ post.title }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+</div>
