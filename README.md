@@ -1,4 +1,0 @@
-patrickhuber.github.io
-======================
-
-blogs
