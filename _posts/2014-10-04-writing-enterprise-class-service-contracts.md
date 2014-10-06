@@ -186,21 +186,25 @@ Much like SQL, OData is very expressive and is functional in nature.
 Using the capabilities above, and assume the Product and Manufacturer class models are now applied as serialized JSON objects.
 
 select by id
+
 ```
 GET svcroot/Products(12345)
 ```
 
 select by name
+
 ```
 GET svcroot/Products?$filter=Name eq 'grapes'
 ```
 
 select multiple criteria
+
 ```
 GET svcroot/Products?$filter=Name eq 'grapes' or Name eq 'apples'
 ```
 
 select entity expand relationship
+
 ```
 GET svcroot/Products(12345)?$expand=Manufacturer
 ```
@@ -225,7 +229,7 @@ Because of this categorization, we will need to standardize a format expressiven
 Following a 'one model in, one model out' philosophy manifests itself as a Request object and a Response object.
 Because the action on the resource is a Read operation (CRUD), we will name the request and reply with this information as well.
 
-#### Data Contracts
+#### Query Data Contracts
 ```CSharp
 public class ProductReadRequest
 {
@@ -257,4 +261,6 @@ public interface ProductService
 	ProductReadResponse Read(ProductReadRequest request);
 }
 ```
+
+#### Command Data Contracts
 
