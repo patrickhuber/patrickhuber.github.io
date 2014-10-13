@@ -233,8 +233,18 @@ Because the action on the resource is a Read operation (CRUD), we will name the 
 ```CSharp
 public class ProductReadRequest
 {
-	public ICollection<ProductReadCriteria> Where{get;set;}
-	public ProductExpand Expand {get;set;}
+	public ProductReadAnyOf[] Where {get;set;}
+	public ProductReadExpand Expand {get;set;}	
+}
+
+public class ProductReadAnyOf
+{
+	public ProductReadAllOf[] AnyOf {get;set;}
+}
+
+public class ProductReadAllOf
+{
+	public ProductReadCriteria[] AllOf {get;set;}
 }
 
 public class ProductReadCriteria
@@ -243,14 +253,18 @@ public class ProductReadCriteria
 	public string Name{get;set;}
 }
 
-public class ProductExpand
+public class ProductReadExpand
 {
-	public bool Manufacturer{get;set;}
+	public ProductReadManufacturerExpand Manufacturer{get;set;}
+}
+
+public class ProductReadManufacturerExpand
+{
 }
 
 public class ProductReadResponse
 {
-	public ICollection<Product> Products{get;set;}
+	public Product[] Products{get;set;}
 }
 ```
 
@@ -260,6 +274,47 @@ public interface ProductService
 {
 	ProductReadResponse Read(ProductReadRequest request);
 }
+```
+#### Usage Comparison
+```CSharp
+var productReadRequest = new ProductReadRequest
+{
+	Where = new []
+	{
+		new ProductReadAnyOf
+		{
+			AnyOf = new []
+			{
+				new ProductReadAllOf
+				{
+					AllOf = new[] 
+					{
+						new ProductReadCriteria
+						{
+							Id = 3
+						}
+					}
+				}
+			}
+		}
+	},
+	Expand = new ProductReadExpand
+	{
+		Manufacturer = new ProductReadManufacturerExpand()
+	}
+};
+```
+
+```
+GET svcroot/Products(12345)?$expand=Manufacturer
+```
+
+```SQL
+SELECT p.*, m.*
+FROM Products p
+LEFT JOIN Manufacturers m
+	on p.ManufacturerId = m.Id
+WHERE Id = 3
 ```
 
 #### Command Data Contracts
