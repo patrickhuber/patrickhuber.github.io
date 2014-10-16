@@ -42,6 +42,7 @@ Product GetProduct(int id);
 ``` 
 
 The pattern is {Action}{Resource}({Identifier}). So for our example above, we have:
+
 *  {Action} = Get
 *  {Resource} = Product
 *  {Identifier} = id
@@ -62,12 +63,14 @@ Product GetProductByName(string name);
 The pattern then changes to {Action}{Resource}By{Property}({Identifier})
 
 Product GetProductById(int id)
+
 *  {Action} = Get
 *  {Resource} = Product
 *  {Property} = Id
 *  {Identifier} = id
 
 Product GetProductByName(int name)
+
 *  {Action} = Get
 *  {Resource} = Product
 *  {Property} = Name
@@ -119,7 +122,9 @@ For small objects this can seem trivial, but for large object sets sending back 
 Also, what do we do for batch operations? With the current contracts, several calls to the same method must be called over and over again.
 
 ## Canonical Expression Inspiration
+
 So we expressed a few capabilities above which are summarized here:
+
 * Read operations should handle multiple criteria
 * Read operations should fetch related entities
 * Read operations could return one or more entities (a set of one is still a set)
