@@ -42,6 +42,7 @@ Product GetProduct(int id);
 ``` 
 
 The pattern is {Action}{Resource}({Identifier}). So for our example above, we have:
+
 *  {Action} = Get
 *  {Resource} = Product
 *  {Identifier} = id
