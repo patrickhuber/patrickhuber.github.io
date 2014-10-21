@@ -235,6 +235,7 @@ Following a 'one model in, one model out' philosophy manifests itself as a Reque
 Because the action on the resource is a Read operation (CRUD), we will name the request and reply with this information as well.
 
 #### Query Data Contracts
+
 ```CSharp
 public class ProductReadRequest
 {
@@ -273,6 +274,56 @@ public class ProductReadResponse
 }
 ```
 
+XML Schema
+```XML
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:complexType name="ProductReadRequest">
+		<xs:sequence>
+			<xs:element name="Where" type="ProductReadAnyOf" minoccurs="0" maxoccurs="unbounded"/>
+			<xs:element name="Expand" type="ProductReadExpand" minoccurs="0" maxoccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>	
+	<xs:complexType name="ProductReadAnyOf">
+		<xs:sequence>
+			<xs:element name="AnyOf" type="ProductReadAllOf" minoccurs="0" maxoccurs="unbounded"/>
+		</xs:sequence>
+	</xscomplexType>
+	<xs:complexType name="ProductReadAllOf">
+		<xs:sequence>
+			<xs:element name="AllOf" type="ProductReadCriteria" minoccurs="0" maxoccurs="unbounded"/>
+		</xs:sequence>
+	</xscomplexType>
+	<xs:complexType name="ProductReadCriteria">
+		<xs:attribute name="id" type="xs:int"/>
+		<xs:attribute name="name" type="xs:string"/>
+	</xscomplexType>
+	<xs:complexType name="ProductReadExpand">
+		<xs:sequence>
+			<xs:element name="Manufacturer" type="ProductReadManufacturerExpand" minoccurs="0" maxoccurs="1"/>
+		</xs:sequence>
+	</xscomplexType>
+	<xs:complexType name="ProductReadManufacturerExpand">
+	</xs:cmplexType>
+	<xs:complexType name="ProductReadResponse">
+		<xs:sequence>
+			<xs:element name="Products" type="Product" minoccurs="0" maxoccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Product">
+		<xs:sequence>		
+			<xs:attribute name="id" type="xs:int"/>
+			<xs:attribute name="name" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Manufacturer">
+		<xs:sequence>		
+			<xs:attribute name="id" type="xs:int"/>
+			<xs:attribute name="name" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
+```
+
 #### Service Interface
 ```CSharp
 public interface ProductService
@@ -281,6 +332,8 @@ public interface ProductService
 }
 ```
 #### Usage Comparison
+
+WCF
 ```CSharp
 var productReadRequest = new ProductReadRequest
 {
@@ -310,10 +363,31 @@ var productReadRequest = new ProductReadRequest
 };
 ```
 
+XML
+```xml
+<ProductReadRequest>
+	<Where>
+		<AnyOf>
+			<AllOf>
+				<ProductCriteria>
+					<Id>3</Id>
+				</ProductCriteria>
+			</AllOf>			
+		</AnyOf>		
+	</Where>
+	<Expand>
+		<Manufacturer/>
+	</Expand>
+</ProductReadRequest>
+```
+
+
+OData
 ```
 GET svcroot/Products(12345)?$expand=Manufacturer
 ```
 
+SQL
 ```SQL
 SELECT p.*, m.*
 FROM Products p
@@ -321,6 +395,17 @@ LEFT JOIN Manufacturers m
 	on p.ManufacturerId = m.Id
 WHERE Id = 3
 ```
+
+You will see that the OData and SQL versions of the query are very terse. Why is the contract for the 
+wcf data contract so large? Well, we need to be able to create a predicate expression without writing a
+domain specific language (DSL). With the expressiveness we have outlined above, a consumer of this service
+can:
+
+* Read a product using an ID
+* Read a product using an ID and Name
+* Read a product using a Name
+* Read products using no criteria
+* Read a product using one of the above and return the associated manufacturer 
 
 #### Command Data Contracts
 
