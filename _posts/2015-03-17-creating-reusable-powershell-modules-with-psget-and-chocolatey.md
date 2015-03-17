@@ -194,6 +194,7 @@ Here are the contents of the nuget spec file.
 ```
 
 The nuspec file contents will vary based on the package you are creating. 
+
 * The id is the name of the package you are creating. 
 * The version is currently 1.0.0, but you will need to make sure and increment the version as you make updates to your package.  Take note of this version number, we will use it again.
 * There is a dependency to PsGet in the "dependencies" section. This tells chocolatey to install the PsGet module before installing this package. 
