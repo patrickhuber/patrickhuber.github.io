@@ -118,7 +118,7 @@ Here are the contents of the IO.psm1 file
 gci $psscriptroot\*.ps1 -exclude ChocolateyInstall.ps1 -Recurse | % {. $_.FullName }
 ```
 
-Special shout out to the blog at kmerwin.com for originating this idea for organizing files. 
+Special shout out to the blog at [kmerwin.com](http://www.kmerwin.com/?p=174) for originating this idea for organizing files. 
 I added an exclude filter in there to make sure I don't include the ChocolateyInstall.ps1 file in actual module. 
 The ChocolateyInstall.ps1 file is the logic that installs our chocolatey package.
 We will add that file now.
