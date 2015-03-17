@@ -424,5 +424,6 @@ UserInfo       :
 From here we can now go and create a set of modules that promote reuse. 
 Adding the modules as dependencies through chocolatey we can easily distribute the reusable scripts in a consistent and repeatable way. 
 
-Here is the sample folder I used in this example.
+Here is the source for the example I created above.
+
 [IO Powershell Module and Chocolatey Package](https://github.com/patrickhuber/Powershell/tree/master/IO)
