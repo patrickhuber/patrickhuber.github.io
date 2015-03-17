@@ -2,13 +2,24 @@
 layout: default
 title: Creating Reusable PowerShell Modules with PsGet and Chocolatey
 ---
-## The Problems
-* I have a few PowerShell modules that I work with that I'd like to distribute internally but I don't want to manually copy the modules into the PowerShell modules folders. 
-* I would also like to benefit from package management and not need to copy folders and files around in order to get reuse out of my modules. If a module has a dependency, it should automatically download that dependency.
-* I would like to give the Operations team a one liner that they can use to install the latest package dependencies and not have to worry about digging around on google to find out how to install the module. 
-* Windows Management Framework v5.0 is currently in Preview
+# Creating Reusable PowerShell Modules with PsGet and Chocolatey
 
-## The NuGet Solution - Dependency Management
+## The Problems
+
+### Install
+I have a few PowerShell modules that I work with that I'd like to distribute internally but I don't want to manually copy the modules into the PowerShell modules folders. 
+
+### Dependency Management
+I would also like to benefit from package management and not need to copy folders and files around in order to get reuse out of my modules. If a module has a dependency, it should automatically download that dependency.
+
+### Learning Curve
+I would like to give the Operations team a one liner that they can use to install the latest package dependencies and not have to worry about digging around on google to find out how to install the module. 
+
+### I want it now
+Windows Management Framework v5.0 is currently in Preview and has package management capabilities that I can't use because they are not production ready. 
+
+## The Solutions
+### NuGet - Dependency Management
 
 NuGet allows for an application to set a dependency on a released package. If the package has dependencies, those dependencies are downloaded automatically when the package is resolved. 
 The ability to resolve packages solves the issue of managing PowerShell dependencies. 
@@ -16,7 +27,7 @@ NuGet out of the box is great, but it is really meant for managing development d
 
 This leads us to...
 
-## The Chocolatey Solution - Software as Packages
+### Chocolatey - Software as Packages
 
 Built upon NuGet, [chocolatey](https://chocolatey.org/) takes the concept of packages and applies it to software installs. 
 This gives the consumer the ability to script the install of software and not just development artifacts.  
@@ -27,12 +38,12 @@ So the install of something like Java is reduced to something like:
 cinst jre8
 ```
 
-## The PsGet Solution - Automate Install of PowerShell Modules
+### PsGet - Automate Install of PowerShell Modules
 
 But what about PowerShell modules? PowerShell modules aren't installed in the traditional sense, they are really copied to a folder in the user's PowerShell Modules directory. 
 Enter [PsGet](http://psget.net/). PsGet allows you to install a module by pointing to a .psm1 file. 
 
-## Putting it all together
+### Putting it all together
 
 We now have individual solutions for all of our problems above, so lets put it all together and build a Chocolatey package for our IO module. 
 
@@ -142,7 +153,8 @@ $packageDirectory = ( $scriptDirectory | Split-Path -Parent )
 Install-Module -ModulePath "$packageDirectory\IO.psm1"
 ```
 
-Going line by line
+Going line by line:
+
 1. We need to import the PsGet module to get access tot he Install-Module cmdlet. 
 2. We are setting the script directory variable by looking at the $PSScriptRoot. The $PSScriptRoot variable was added in PowerShell v3. If you want to use a earlier version of powershell, you can use $myInvocation.MyCommand.Definition.
 3. Because the module is located in the package root and the ChocolateyInstall.ps1 file is located in the tools directory, we need to get the parent directory to the ChocolateyInstall.ps1 file.
@@ -340,7 +352,7 @@ Because I don't want to check the package into source control, I'm going to move
 This feed directory can be anything, but I'll place mine in the root of c:\
 
 ```powershell 
-mkdir C:\chocolatey\local-repo
+mkdir "C:\chocolatey\local-repo"
 ```
 
 Running DIR on this folder shows my package file.
