@@ -4,6 +4,8 @@ title: Creating Reusable PowerShell Modules with PsGet and Chocolatey
 ---
 # Creating Reusable PowerShell Modules with PsGet and Chocolatey
 
+As automation becomes more popular, teams need a way to organize scripts in source control and ultimately deliver those scripts to a runtime environment in a consistent and repeatable way. 
+
 ## The Problems
 
 ### Install
