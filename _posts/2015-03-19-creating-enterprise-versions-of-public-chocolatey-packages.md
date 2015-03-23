@@ -35,10 +35,9 @@ The link for the Debug Diag chocolatey package is located here:
 
 [debug diag](https://chocolatey.org/packages/debugdiagnostic)
 
-### Commands
+### Using 7z.exe on the Command Line
 
-Running 7z.exe runs 7zip from the command line. 
-You may have to add the install directory to the environment variable path before 7z will execute on the command prompt.
+In order to run 7z.exe runs 7zip from the command line, you may have to add the install directory to the environment variable path before 7z will execute on the command prompt.
 
 ```
 PS > 7z l .\debugdiagnostic.2.1.0.7.nupkg
