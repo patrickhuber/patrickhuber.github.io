@@ -132,45 +132,30 @@ Install-ChocolateyPackage $packageName $fileType $silentArgs $url $url64bit
 
 ### Update
 
-Now we need to take the original chocolatey package and update the chocolateyInstall.ps1 with the file we just edited.
+Now we need to recreate the original chocolatey package with the updated chocolateyInstall.ps1.
 
-We can use the "7z a" command to re-create the package. 
-We will use the extension .zip to create the file for now and we will rename in the next section.
-
-```
-7z a debugdiagnostic.2.1.0.7.zip .\debugdiagnostic.2.1.0.7\* -r
-
-7-Zip [64] 9.20  Copyright (c) 1999-2010 Igor Pavlov  2010-11-18
-Scanning
-
-Creating archive debugdiagnostic.2.1.0.7.zip
-
-Compressing  debugdiagnostic.nuspec
-Compressing  package\services\metadata\core-properties\2838bbf8051044378d3fbfab8a2ea205.psmdcp
-Compressing  tools\chocolateyInstall.ps1
-Compressing  [Content_Types].xml
-Compressing  _rels\.rels
-
-Everything is Ok
-```
-
-So now we have a debugdiagnostic.2.1.0.7.zip file and a debugdiagnostic.2.1.0.7.nupkg file. 
-We will rename the existing "nupkg" file to a "nupkg.bak" extension and the "zip" file to "nupkg" extension.
+We can use the "choco pack" command to repackage the artifacts, but we first need to cleanup some of the directories generated during the zip process.
 
 ```powershell
-move debugdiagnostic.2.1.0.7.nupkg debugdiagnostic.2.1.0.7.nupkg.bak
-move debugdiagnostic.2.1.0.7.zip debugdiagnostic.2.1.0.7.nupkg
+rmdir _rels \s \q
+rmdir package \s \q
+del [Content_Types].xml
 ```
 
-Running DIR on the directory we now see the two files
+The folder is ready to be packaged. I ran "choco pack" from the same directory that the .nuspec file exists.
 
+```powershell
+choco pack
+
+Chocolatey v0.9.9.1
+Attempting to build package from 'debugdiagnostic.nuspec'.
+Successfully created package 'debugdiagnostic.2.1.0.7.nupkg'
 ```
-PS > dir *.nupkg
 
-Mode                LastWriteTime     Length Name
-----                -------------     ------ ----
--a---         3/24/2015  10:55 AM       3931 debugdiagnostic.2.1.0.7.nupkg.bak                                             
--a---         3/24/2015   9:53 AM       3931 debugdiagnostic.2.1.0.7.nupkg
+I now need to move the file to the repository directory.
+
+```powershell
+move debugdiagnostic.2.1.0.7.nupkg c:\chocolatey\local-repo\
 ```
 
 ### Summary 
@@ -253,42 +238,37 @@ Install-ChocolateyPackage $packageName $fileType $silentArgs $url $url64bit
 
 ### Update
 
-Now that we have modified the package contents to point to the self-contained msi files, lets recombine the nupkg file as we did before.
-
-Using 7z, we will again run the archive command and produce a zip file
-
-```
-7z a debugdiagnostic.2.1.0.7.zip .\debugdiagnostic.2.1.0.7\* -r
-
-7-Zip [64] 9.22 beta  Copyright (c) 1999-2011 Igor Pavlov  2011-04-18
-Scanning
-
-Creating archive debugdiagnostic.2.1.0.7.zip
-
-Compressing  debugdiagnostic.2.1.0.7.zip
-Compressing  debugdiagnostic.nuspec
-Compressing  package\services\metadata\core-properties\2838bbf8051044378d3fbfab8a2ea205.psmdcp
-Compressing  tools\chocolateyInstall.ps1
-Compressing  tools\DebugDiagx64.msi
-Compressing  tools\DebugDiagx86.msi
-Compressing  tools\Untitled1.ps1
-Compressing  [Content_Types].xml
-Compressing  _rels\.rels
-
-Everything is Ok
-```
-
-You can see the installer files have been included in the zip file.
-Now we can rename the original "nupkg" file with a backup extension and rename the "zip" file with the "nupkg" extension.
+Similar to the previous example, we will cleanup the directory removing chocolatey artifacts from the base directory.
 
 ```powershell
-move debugdiagnostic.2.1.0.7.nupkg debugdiagnostic.2.1.0.7.nupkg.bak
-move debugdiagnostic.2.1.0.7.zip debugdiagnostic.2.1.0.7.nupkg
+rmdir _rels \s \q
+rmdir package \s \q
+del [Content_Types].xml
+```
+
+The folder is ready to be packaged. Running "choco pack"
+
+```powershell
+choco pack
+
+Chocolatey v0.9.9.1
+Attempting to build package from 'debugdiagnostic.nuspec'.
+Successfully created package 'debugdiagnostic.2.1.0.7.nupkg'
+```
+
+Again we move the file to the local repository.
+
+```powershell
+move debugdiagnostic.2.1.0.7.nupkg c:\chocolatey\local-repo\
 ```
 
 ### Summary
 
-Again, the updated nupkg file is ready to be uploaded to our local repository. 
+Again the package is ready to be consumed by choco install.
+
+```powershell
+choco install debugdiagnostic -source '""'
+```
 
 ## Conclusions
 
