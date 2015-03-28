@@ -267,7 +267,7 @@ move debugdiagnostic.2.1.0.7.nupkg c:\chocolatey\local-repo\
 Again the package is ready to be consumed by choco install.
 
 ```powershell
-choco install debugdiagnostic -source '""'
+choco install debugdiagnostic -source '"c:\chocolatey\local-repo\"'
 ```
 
 ## Conclusions
