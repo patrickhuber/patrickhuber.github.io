@@ -159,7 +159,7 @@ Install-Module -ModulePath "$packageDirectory"
 
 Going line by line:
 
-1. We need to import the PsGet module to get access tot he Install-Module cmdlet. 
+1. We need to import the PsGet module to get access to the Install-Module cmdlet. 
 2. We are setting the script directory variable by looking at the $PSScriptRoot. The $PSScriptRoot variable was added in PowerShell v3. If you want to use a earlier version of powershell, you can use $myInvocation.MyCommand.Definition.
 3. Because the module is located in the package root and the ChocolateyInstall.ps1 file is located in the tools directory, we need to get the parent directory to the ChocolateyInstall.ps1 file.
 4. We use the Package Directory to load our IO.psm1 module file using the Install-Module cmdlet from the PsGet module. It is important to use the directory here and not the .psm1 because using the directory will load all of our module files.
