@@ -275,6 +275,7 @@ public class ProductReadResponse
 ```
 
 XML Schema
+
 ```XML
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<xs:complexType name="ProductReadRequest">
@@ -325,6 +326,7 @@ XML Schema
 ```
 
 #### Service Interface
+
 ```CSharp
 public interface ProductService
 {
@@ -334,6 +336,7 @@ public interface ProductService
 #### Usage Comparison
 
 WCF
+
 ```CSharp
 var productReadRequest = new ProductReadRequest
 {
@@ -364,6 +367,7 @@ var productReadRequest = new ProductReadRequest
 ```
 
 XML
+
 ```xml
 <ProductReadRequest>
 	<Where>
@@ -383,11 +387,13 @@ XML
 
 
 OData
+
 ```
 GET svcroot/Products(12345)?$expand=Manufacturer
 ```
 
 SQL
+
 ```SQL
 SELECT p.*, m.*
 FROM Products p
