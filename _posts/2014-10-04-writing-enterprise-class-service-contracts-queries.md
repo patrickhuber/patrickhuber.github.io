@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Designing Enterprise Class Service Contracts
+title: Designing Enterprise Class Service Contracts - Queries
 ---
 
 ## Overview
@@ -405,7 +405,4 @@ can:
 * Read a product using an ID and Name
 * Read a product using a Name
 * Read products using no criteria
-* Read a product using one of the above and return the associated manufacturer 
-
-#### Command Data Contracts
-
+* Read a product using one of the above and return the associated manufacturer
