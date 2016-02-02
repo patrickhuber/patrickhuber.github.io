@@ -132,7 +132,7 @@ So we expressed a few capabilities above which are summarized here:
 ### What can we learn from databases?
 A simple T-SQL example will show that the expressions above can be expressed in relative ease. For example, assume we have the following DDL.
 
-```SQL
+```sql
 CREATE TABLE PRODUCTS
 (
 	Id int not null identity(1,1),
@@ -151,7 +151,7 @@ CREATE TABLE MANUFACTURERS
 
 For simplicity sake, the schema above represents the same structure as our domain model. Running over the list of capabilities, lets see what we can accomplish with sql select statements.
 
-```SQL
+```sql
 -- select by id
 -- returns single entity
 SELECT *
@@ -276,7 +276,7 @@ public class ProductReadResponse
 
 XML Schema
 
-```XML
+```xml
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<xs:complexType name="ProductReadRequest">
 		<xs:sequence>
@@ -394,7 +394,7 @@ GET svcroot/Products(12345)?$expand=Manufacturer
 
 SQL
 
-```SQL
+```sql
 SELECT p.*, m.*
 FROM Products p
 LEFT JOIN Manufacturers m
