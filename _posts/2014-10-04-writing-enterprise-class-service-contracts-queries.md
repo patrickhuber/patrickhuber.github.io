@@ -19,13 +19,13 @@ All with similar meeting. The most common word  you see for service operations t
 For example, there are many ways to say "Return a Product". You might write something like this:
 
 ## First, Our Model
-```CSharp
+```csharp
 public class Product
 {
     public int Id {get;set;}
     public string Name {get;set;}
     public string Description {get;set;}  
-	public Manufacturer Manufacturer {get;set;}
+    public Manufacturer Manufacturer {get;set;}
 }
 
 public class Manufacturer
@@ -37,7 +37,7 @@ public class Manufacturer
 ```
 
 #### A Simple Method Example
-```CSharp
+```csharp
 Product GetProduct(int id);
 ``` 
 
@@ -55,7 +55,7 @@ The important part is to remain consistent.
 What if you want to fetch a product by Name? Time to add another method. 
 We don't want to be unclear about how to fetch a product, so we better describe what the product method is using as criteria.
 
-```CSharp
+```csharp
 Product GetProductById(int id);
 Product GetProductByName(string name);
 ```
@@ -80,7 +80,7 @@ Product GetProductByName(int name)
 What if you want to fetch a product by related products or fetch products and their related products? 
 We typically add more methods. Now we need to start representing the return types as lists. 
 
-```CSharp
+```csharp
 Product GetProductById(int id);
 Product GetProductByName(string name);
 ICollection<Product> GetProductListByManufacturerId(int id);
@@ -108,7 +108,7 @@ Command Query Response Segregation [(CQRS)](http://martinfowler.com/bliki/CQRS.h
 ### Simple Create, Update and Delete examples
 Lets take a simple approach to modifying a Product may take the form of the following.
 
-```CSharp
+```csharp
 void CreateProduct(Product product);
 void DeleteProduct(int id);
 void UpdateProduct(Product product);
@@ -132,7 +132,7 @@ So we expressed a few capabilities above which are summarized here:
 ### What can we learn from databases?
 A simple T-SQL example will show that the expressions above can be expressed in relative ease. For example, assume we have the following DDL.
 
-```SQL
+```sql
 CREATE TABLE PRODUCTS
 (
 	Id int not null identity(1,1),
@@ -151,7 +151,7 @@ CREATE TABLE MANUFACTURERS
 
 For simplicity sake, the schema above represents the same structure as our domain model. Running over the list of capabilities, lets see what we can accomplish with sql select statements.
 
-```SQL
+```sql
 -- select by id
 -- returns single entity
 SELECT *
@@ -236,7 +236,7 @@ Because the action on the resource is a Read operation (CRUD), we will name the 
 
 #### Query Data Contracts
 
-```CSharp
+```csharp
 public class ProductReadRequest
 {
 	public ProductReadAnyOf[] Where {get;set;}
@@ -276,7 +276,7 @@ public class ProductReadResponse
 
 XML Schema
 
-```XML
+```xml
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<xs:complexType name="ProductReadRequest">
 		<xs:sequence>
@@ -327,7 +327,7 @@ XML Schema
 
 #### Service Interface
 
-```CSharp
+```csharp
 public interface ProductService
 {
 	ProductReadResponse Read(ProductReadRequest request);
@@ -337,7 +337,7 @@ public interface ProductService
 
 WCF
 
-```CSharp
+```csharp
 var productReadRequest = new ProductReadRequest
 {
 	Where = new []
@@ -394,7 +394,7 @@ GET svcroot/Products(12345)?$expand=Manufacturer
 
 SQL
 
-```SQL
+```sql
 SELECT p.*, m.*
 FROM Products p
 LEFT JOIN Manufacturers m
