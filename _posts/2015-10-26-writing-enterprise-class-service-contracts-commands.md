@@ -42,14 +42,14 @@ public class Manufacturer
 When presented with a simple domain model like above, 
 the first reaction is to create Update, Delete and Create methods for the domain models.
 
-```CSharp
+```csharp
 void UpdateProduct(Product product);
 void CreateProduct(Product product);
 void DeleteProduct(Product product);
 void UpdateProductManufacturer(Product product, Manufacturer newManufacturer);
 ```
 
-```CSharp
+```csharp
 void UpdateManufacturer(Manufacturer manufacturer);
 void CreateManufacturer(Manufacturer manufacturer);
 void DeleteManufacturer(Manufacturer manufacturer);
@@ -104,7 +104,7 @@ and avoid duplicating data, relationships will be represented with a simple name
 
 ### The Product Contracts
 
-```CSharp
+```csharp
 
 public class CreateProductRequest
 {
