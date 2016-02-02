@@ -19,13 +19,13 @@ All with similar meeting. The most common word  you see for service operations t
 For example, there are many ways to say "Return a Product". You might write something like this:
 
 ## First, Our Model
-```CSharp
+```csharp
 public class Product
 {
     public int Id {get;set;}
     public string Name {get;set;}
     public string Description {get;set;}  
-	public Manufacturer Manufacturer {get;set;}
+    public Manufacturer Manufacturer {get;set;}
 }
 
 public class Manufacturer
@@ -37,7 +37,7 @@ public class Manufacturer
 ```
 
 #### A Simple Method Example
-```CSharp
+```csharp
 Product GetProduct(int id);
 ``` 
 
@@ -55,7 +55,7 @@ The important part is to remain consistent.
 What if you want to fetch a product by Name? Time to add another method. 
 We don't want to be unclear about how to fetch a product, so we better describe what the product method is using as criteria.
 
-```CSharp
+```csharp
 Product GetProductById(int id);
 Product GetProductByName(string name);
 ```
@@ -80,7 +80,7 @@ Product GetProductByName(int name)
 What if you want to fetch a product by related products or fetch products and their related products? 
 We typically add more methods. Now we need to start representing the return types as lists. 
 
-```CSharp
+```csharp
 Product GetProductById(int id);
 Product GetProductByName(string name);
 ICollection<Product> GetProductListByManufacturerId(int id);
@@ -108,7 +108,7 @@ Command Query Response Segregation [(CQRS)](http://martinfowler.com/bliki/CQRS.h
 ### Simple Create, Update and Delete examples
 Lets take a simple approach to modifying a Product may take the form of the following.
 
-```CSharp
+```csharp
 void CreateProduct(Product product);
 void DeleteProduct(int id);
 void UpdateProduct(Product product);
@@ -236,7 +236,7 @@ Because the action on the resource is a Read operation (CRUD), we will name the 
 
 #### Query Data Contracts
 
-```CSharp
+```csharp
 public class ProductReadRequest
 {
 	public ProductReadAnyOf[] Where {get;set;}
@@ -327,7 +327,7 @@ XML Schema
 
 #### Service Interface
 
-```CSharp
+```csharp
 public interface ProductService
 {
 	ProductReadResponse Read(ProductReadRequest request);
@@ -337,7 +337,7 @@ public interface ProductService
 
 WCF
 
-```CSharp
+```csharp
 var productReadRequest = new ProductReadRequest
 {
 	Where = new []
