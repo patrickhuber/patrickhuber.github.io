@@ -5,7 +5,7 @@ title: Designing Enterprise Class Service Contracts - Commands
 
 ## Overview
 In a previous blog post I covered creating enterprise class serivce contracts for reading data. 
-In this blog post, I will build off of the previous examples and continue with writing service cotnracts
+In this blog post, I will build off of the previous examples and continue with writing service contracts
 for modifying state. 
 
 The goal is to follow the CQRS pattern of separating commands and queries in order to keep a clean 
@@ -20,13 +20,13 @@ options for the reader.
 
 In the previous example, we created the following data model.
 
-```CSharp
+```csharp
 public class Product
 {
     public int Id {get;set;}
     public string Name {get;set;}
     public string Description {get;set;}  
-	public Manufacturer Manufacturer {get;set;}
+    public Manufacturer Manufacturer {get;set;}
 }
 
 public class Manufacturer
