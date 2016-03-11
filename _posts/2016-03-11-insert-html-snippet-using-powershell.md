@@ -12,7 +12,7 @@ $html = "
     <body some-attribute=`"`"></body>
 </html>"
 
-$htmlSplit = $html -split "(<body[^>]+>)"
+$htmlSplit = $html -split "(<body[^>]*>)"
 $htmlSplit[1]+= "
 <div>
     <p>this is a paragraph</p>
