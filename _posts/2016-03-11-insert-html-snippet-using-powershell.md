@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Designing Enterprise Class Service Contracts - Commands
+title: Insert Html Snippet into Existing Html Document with Powershell
 ---
 I recently needed to insert a html snippet into the beginning of a html document using powershell and found a regex solution that 
 did the job. 
