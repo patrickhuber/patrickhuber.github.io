@@ -21,6 +21,7 @@ I would like to give the Operations team a one liner that they can use to instal
 Windows Management Framework v5.0 is currently in Preview and has package management capabilities that I can't use because they are not production ready. 
 
 ## The Solutions
+
 ### NuGet - Dependency Management
 
 NuGet allows for an application to set a dependency on a released package. If the package has dependencies, those dependencies are downloaded automatically when the package is resolved. 
