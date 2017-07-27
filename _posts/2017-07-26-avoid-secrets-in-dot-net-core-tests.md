@@ -104,9 +104,10 @@ namespace MyAwesomeLibrary.Tests.Integration
             // normally you wouldn't do this
             var requestUri = $"http://httpbin.org/basic-auth/{username}/{password}";
 
-            HttpClient client = new HttpClient();
-            using (var request = new HttpRequestMessage(HttpMethod.Get, requestUri))
-            {
+            using (HttpClient client = new HttpClient())
+            { 
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            
                 var credential = $"{username}:{password}";
                 var credentialBytes = Encoding.ASCII.GetBytes(credential);
                 var credentialBase64 = Convert.ToBase64String(credentialBytes);
