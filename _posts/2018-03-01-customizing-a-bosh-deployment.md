@@ -82,11 +82,11 @@ bosh deploy -d kubo submodules/github.com/cloudfoundry-incubator/kubo-deployment
 
 As a general practice I put external dependencies above specific dependencies of my deployment so that my deployment settings override the settings of the dependency (which is often the indended behavior).
 
-You'll see I have the master IP address coded in this shell script, I would argue this violates the [portability principle](#portability-principle) as it ties me to a specific network configuration. I did it for simplicity when setting up this deployment and will move it into the configuration server.
+You'll see I have the master IP address coded in this shell script, I would argue this violates the [portability principle](#portability-principle) as it ties me to a specific network configuration. I did it for simplicity when setting up this deployment and as you will see later, this can be easily moved to an environment specific configuration.
 
 ### Ops Files
 
-[Ops files](https://bosh.io/docs/cli-ops-files.html) are the key to customizing a deployment. Most deployment place ops files in some distinct directory like "ops-files" or "ops", I recommend doing the same as it keeps the root directory clear of your modifications and makes it clear at first glance how to execute the deployment. Using ops files allows us to adhear to the [modification principle](#modification-principle) by not mutating our dependency.
+[Ops files](https://bosh.io/docs/cli-ops-files.html) are the key to customizing a deployment. Most deployment place ops files in some distinct directory like "ops-files", "ops" or "operations", I recommend doing the same as it keeps the root directory clear of your modifications and makes it clear at first glance how to execute the deployment. Using ops files allows us to adhear to the [modification principle](#modification-principle) by not mutating our dependency and the [portability principle](#portability-principle) by exposing variables that we can later configure with environment specific configurations.
 
 You can see in the shell scripts section above that I used custom ops files to:
 
@@ -96,7 +96,7 @@ You can see in the shell scripts section above that I used custom ops files to:
 
 The updating the release artifact location helps to implement the [dependencies principle](#dependencies-principle). We want to know the exact version of the release we have a dependency on. Leaving this value floating can lead to a broken deployment if another deployment happens to use the same release but of a different version. 
 
-In general I try to make ops files declarative in name and fulfill a specific purpose. For example 'one-az.yml' is very clear that the ops file sets the AZ count to 1. If you need more flexibilty, you can add an ops file that creates a variable. Do this if the value needs to be updated regularly or is specified through another variable that you want to reference. 
+In general I try to make ops files declarative in name and fulfill a specific purpose. For example 'one-az.yml' is very clear that the ops file sets the AZ count to 1. If you need more flexibilty, you can add an ops file that creates a variable. Do this if the value needs to be updated regularly or is specified through another variable that you want to reference. In the AZ case, I would call this ops file 'azs.yml' denoting it changes the AZs.
 
 ### Defaults
 
@@ -130,7 +130,9 @@ You can name the directory anything you like. Typically the dependencies will be
 
 ### Create Dependency Submodules
 
-As we showed above, we then need to establish our dependencies. For the vault release, we need to take a dependency on the [vault deployment](https://github.com/cloudfoundry-community/vault-boshrelease). Sometimes a distinct repo exists for a deployment, and sometimes the deployment and release are coupled in the same repo. This is an example of the release and sample deployment being coupled.
+As we showed above, we then need to establish our dependencies. For the vault release, we need to take a dependency on the [vault bosh release](https://github.com/cloudfoundry-community/vault-boshrelease). Sometimes a distinct repo exists for a deployment, and sometimes the deployment and release are coupled in the same repo. This is an example of the release and deployment being coupled.
+
+For an example of distinct release and deployment repos, see the [concourse deployment](https://github.com/concourse/concourse-deployment) and [concourse release](https://github.com/concourse/concourse) repos.
 
 To establish the dependency, we use the submodules command from above to create a dependency and then use the checkout command within the submodule directory to pin it to a specific version. 
 
@@ -189,13 +191,13 @@ git push origin master
 
 Now I want to modify the deployment to change the number of AZs from 1 to 3. The vault bosh release comes with a ops file for modifying the AZ list [here](https://github.com/cloudfoundry-community/vault-boshrelease/blob/master/manifests/operators/azs.yml). This allows me to specify a different number of AZs for each of my environments. This is great if I have say a lab environment with only one AZ and a QA or Production environment with the recommended 3.
 
-Update the deploy-vault.sh file with the custom ops file
+Update the deploy-vault.sh file with the ops file
 
 ```bash
 bosh deploy -d vault \
      submodules/cloudfoundry-community/vault-boshrelease/manifests/vault.yml \
-     -o submodules/cloudfoundry-community/vault-boshrelease/manifests/operators/azs.yml \
-     -v azs=[az1,az2,az3]
+     --ops-file submodules/cloudfoundry-community/vault-boshrelease/manifests/operators/azs.yml \
+     --var azs=[az1,az2,az3]
 ```
 
 Deploy changes:
@@ -208,14 +210,14 @@ Save changes:
 
 ```bash
 git add -A
-git commit -m "created a customized bosh deployment for vault"
+git commit -m "adds ops file"
 # add your remote here if you haven't done so
 git push origin master
 ```
 
 ### Updating the deployment
 
-Now that I have a sample deployment of relative complexity, I am going to update the deployment from v0.7.0 to v0.8.0. This is relatively easy because I'm using a submodule that is tracked by source control. 
+Now that I have a sample deployment of minor complexity, I am going to update the deployment from v0.7.0 to v0.8.0. This is relatively easy because I'm using a submodule that is tracked by source control. 
 
 First things first, I'll change the working directory to the submodule directory
 
@@ -240,7 +242,7 @@ Now that my vault deployment is completed, I'm going to save my changes:
 
 ```bash
 git add -A
-git commit -m "created a customized bosh deployment for vault"
+git commit -m "updates vault bosh release version"
 # add your remote here if you haven't done so
 git push origin master
 ```
@@ -250,6 +252,10 @@ git push origin master
 I want to keep my deployment portable so I'm going to write the az configuration to distinct files that mirror my environment structures. I'm then going to update the bash script with a configurable parameter with a default. This will allow me to keep the script simple and override the defaults in my production CI pipeline.
 
 Like I mentioned before, I have a single AZ in my lab environment and have three AZs in my production environemnt. To represent those two environments I'm going to create environment specific vars files. 
+
+Why do this with vars files and not the config server? 
+
+Well, we really only want to use the config server to store secrets. If we start storing more and more configuration information in the config server we could end up with a situation where our state is no longer tracked by source control and it is very difficult to see what changed between deployments. For this reason, keep things that are static between deployments configured with ops files and use variables with environment specific ops files for things that change between environments. Remember, you are not creating 'the' reusable deployment, you are creating a customized iteration of the more generic deployment manifest. So its OK to hard code things.
 
 ```bash
 mkdir vars-files
@@ -262,3 +268,74 @@ cat <<EOF > vars-files/prod.yml
 azs: [z1,z2,z3]
 EOF
 ```
+
+By default I want to deploy the lab configuration. When I script this out for CI, I'm going to keep it simple and specify a single parameter of the environment name. If the enviornment name cannot be found, I'll throw an error and exit the script.
+
+```bash
+#!/bin/bash
+
+# set defaults
+export ENVIRONMENT=lab
+
+# check parameters
+# see: https://stackoverflow.com/a/7069755
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo "options:"
+      echo "-h, --help          show help"
+      echo "-e, --environment   specify environment (lab|prod) default (lab)"
+      ;;
+    -e|--environment)
+      shift
+      if test $# -gt 0; then
+        export ENVIRONMENT=$1
+      else
+        echo "no environment specified"
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
+
+# verify the vars file exists. If not throw a descriptive message
+export ENVIRONMENT_VARS_FILE=vars-files/$ENVIRONMENT.yml
+if [ ! -f $ENVIRONMENT_VARS_FILE]; then
+  echo "$ENVIRONMENT_VARS_FILE not found. Did you specify the correct environment?"
+  exit 1
+fi
+
+# do the deployment with the environment vars file
+bosh deploy -d vault \
+     submodules/cloudfoundry-community/vault-boshrelease/manifests/vault.yml \
+     --ops-file submodules/cloudfoundry-community/vault-boshrelease/manifests/operators/azs.yml \
+     --vars-file $ENVIRONMENT_VARS_FILE
+```
+
+Locally for development I can still type
+
+```bash
+./deploy-vault.sh
+```
+
+When I add this to my CI pipeline, I'll change it to:
+
+```bash
+./deploy-vault.sh --environment prod
+```
+
+Saving changes and pushing we now have a repo that supports local development and can be re-used for production with a simple flag. 
+
+```bash
+git add -A
+git commit -m "adds environment specific support"
+# add your remote here if you haven't done so
+git push origin master
+```
+
+## Conclusion
+
+Hopefully you find this post useful in your adventures with BOSH. We have covered how to create a deployment that is free of secrets and flexible enough to implement your architecture but loose enough to inject environment specific configuration. 
+
+If you have any additions or comments on this post, I maintain my blog through github. Feel free to submit an issue or pull request here: https://github.com/patrickhuber/patrickhuber.github.io
