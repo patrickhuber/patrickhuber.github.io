@@ -145,11 +145,7 @@ cd submodules/github.com/cloudfoundry-community
 git checkout v0.7.0
 ```
 
-I like to organize submodules by (similar to how golang organizes dependencies), though you can use whatever scheme works for you:
-
-1. source control provider
-2. org or user
-3. repo
+I like to organize submodules by source control provider, org|user then repo (similar to how golang organizes dependencies), though you can use whatever scheme works for you.
 
 ### Work Loop
 
