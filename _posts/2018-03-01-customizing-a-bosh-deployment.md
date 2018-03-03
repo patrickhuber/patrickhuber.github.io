@@ -86,7 +86,7 @@ You'll see I have the master IP address coded in this shell script, I would argu
 
 ### Ops Files
 
-[Ops files](https://bosh.io/docs/cli-ops-files.html) are the key to customizing a deployment. Most deployment place ops files in some distinct directory like "ops-files", "ops" or "operations", I recommend doing the same as it keeps the root directory clear of your modifications and makes it clear at first glance how to execute the deployment. Using ops files allows us to adhear to the [modification principle](#modification-principle) by not mutating our dependency and the [portability principle](#portability-principle) by exposing variables that we can later configure with environment specific configurations.
+[Ops files](https://bosh.io/docs/cli-ops-files.html) are the key to customizing a deployment. Most deployments place ops files in some distinct directory like "ops-files", "ops" or "operations", I recommend doing the same as it keeps the root directory clear of your modifications and makes it clear at first glance how to execute the deployment. Using ops files allows us to adhear to the [modification principle](#modification-principle) by not mutating our dependency and the [portability principle](#portability-principle) by exposing variables that we can later configure with environment specific configurations.
 
 You can see in the shell scripts section above that I used custom ops files to:
 
