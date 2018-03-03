@@ -13,7 +13,7 @@ Lets go over a few principles that we want to establish which will guide the wor
 1. <a name="modification-principle">**Modification Principle**</a> - Avoid modifing deployment repo dependencies. Modifying dependencies can result in a brittle deployment. If the dependency updates and you have made modifications you will need to track those modifications with merges which is a lot of overhead over just getting the latest version and re-deploying. 
 2. <a name="dependency-principle">**Dependency Principle**</a> - Take a hard dependency on a version/release of a deployment repo. In order to make your deployment more resilient, fix your dependencies to a specific version. This can take the form of a specific URI or tags/commit identifiers in source control.
 3. <a name="secrets-principle">**Secrets Principle**</a> - Don't store secrets in source control, always use a configuration server like CredHub. The best way get breached or to be exploited by farming bots is to put your secrets in source control (so don't do it). Using a config server eliminates the risk of accidently checking in a secret vars file or forgetting to mask a directory with .gitignore. Not to mention it prevents secrets from being stored in plain text on a file system.
-4. <a name="portability-principle">**Portability Principle**</a> - In order to maintain as much portibility as possible, try to push as much information about the content of your deployment to the config server. This excludes structural things like number of AZs, instance counts or cloud provider used. Having a portable configuration will make it easier to move to a different environment. This principle is a bit more flexible than the others as 'portability'. In general, if something changes between deployment environments, it is a good candidate for configuration server or specific variables. 
+4. <a name="portability-principle">**Portability Principle**</a> - In order to remain portable, try to push configuration that varies between deployments to environment specific configuration. This is a customization of a deployment so this includes structural things like number of AZs and instance counts. Having a portable configuration will make it easier to move to a different environment. In general, if something changes between deployment environments, it is a good candidate for pulling out into environment specific configuration.
 
 ## Architecture
 
@@ -49,11 +49,11 @@ For all intensive purposes, this is a version identifier that pins your deplende
 
 ### Configuration Server
 
-The BOSH Configuration Server is key to keeping the customized repo clean of secrets and specific configuration items that limit its portability. This will allow us to implement the [secrets principle](#secrets-principle) and [portability principle](#portability-principle). The configuration server should be kept clear of structural things like number of AZs or instance counts. Storing secrets in the config server is not only safe and protects you from secret leaks, it also has the added benefit of keeping our customized deployment clean of gitignore masked directories and vars files.
+The BOSH Configuration Server is key to keeping the customized repo clean of secrets and specific configuration items that limit its portability. This will allow us to implement the [secrets principle](#secrets-principle). The configuration server should be kept clear of structural things like number of AZs or instance counts. Those elements are good candidates for environment specific configuration which adhears to the portability principle. Storing secrets in the config server is not only safe and protects you from secret leaks, it also has the added benefit of keeping our customized deployment clean of gitignore masked directories.
 
 CredHub is the defualt configuration server supplied through the https://github.com/cloudfoundry/bosh-deployment/credhub.yml ops file. You simply need to add the uaa.yml and credhub.yml as ops files to your deployment of bosh in order to set it up. [This repo](https://github.com/nsagoo-pivotal/concourse-credhub-bosh-deployment) does an excellent job of stepping through the setup. 
 
-You will still need to deal with the zero secrets problem, luckily password managers like lastpass and onepassword have CLIs that can be used 
+You will still need to deal with the zero secrets problem, luckily password managers like lastpass and onepassword have CLIs that can be used to pull the initial secrets needed to access CredHub.
 
 ### Shell Scripts
 
@@ -187,23 +187,15 @@ git push origin master
 
 #### Ops Files
 
-Now I want to modify the deployment to change the number of AZs from 1 to 3. The vault bosh release comes with a ops file for modifying the AZ list [here](https://github.com/cloudfoundry-community/vault-boshrelease/blob/master/manifests/operators/azs.yml) but I don't want to expose this as a variable, so I'll create an ops file to do this and place it in the ops-files directory.
-
-```bash
-cat ops-files/three-azs.yml <<EOF > ops-files/three-azs.yml
----
-- type: replace
-  path: /instance_groups/name=vault/azs
-  value: [az1,az2,az3]
-EOF
-```
+Now I want to modify the deployment to change the number of AZs from 1 to 3. The vault bosh release comes with a ops file for modifying the AZ list [here](https://github.com/cloudfoundry-community/vault-boshrelease/blob/master/manifests/operators/azs.yml). This allows me to specify a different number of AZs for each of my environments. This is great if I have say a lab environment with only one AZ and a QA or Production environment with the recommended 3.
 
 Update the deploy-vault.sh file with the custom ops file
 
 ```bash
 bosh deploy -d vault \
      submodules/cloudfoundry-community/vault-boshrelease/manifests/vault.yml \
-     -o ops-files/three-azs.yml
+     -o submodules/cloudfoundry-community/vault-boshrelease/manifests/operators/azs.yml \
+     -v azs=[az1,az2,az3]
 ```
 
 Deploy changes:
@@ -253,11 +245,20 @@ git commit -m "created a customized bosh deployment for vault"
 git push origin master
 ```
 
-### Variables
+### Environment Specific Vars Files
 
-I want to keep my deployment portable so I'm going to save some static IP addresses in CredHub so that my deployment remains portable across environments. These static IP addresses should be setup in the static IP range in my bosh deployment first. Once the static IP addresses are in the bosh deployment, I can use them in my deployment. 
+I want to keep my deployment portable so I'm going to write the az configuration to distinct files that mirror my environment structures. I'm then going to update the bash script with a configurable parameter with a default. This will allow me to keep the script simple and override the defaults in my production CI pipeline.
 
-First I need to write the static IP addresses to the configuration server using the credhub CLI. 
+Like I mentioned before, I have a single AZ in my lab environment and have three AZs in my production environemnt. To represent those two environments I'm going to create environment specific vars files. 
 
-```
+```bash
+mkdir vars-files
+cat <<EOF > vars-files/lab.yml
+---
+azs: [z1]
+EOF
+cat <<EOF > vars-files/prod.yml
+---
+azs: [z1,z2,z3]
+EOF
 ```
