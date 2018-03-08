@@ -26,7 +26,7 @@ In order to follow the [modification principle](#modification-principle) and [de
 The commands for adding a submodule are pretty simple
 
 ```bash
-git submodule add https://github.com/cloudfoundry-incubator/kubo-deployment submodules/github.com/cloudfoundry-incubator
+git submodule add https://github.com/cloudfoundry-incubator/kubo-deployment submodules/github.com/cloudfoundry-incubator/kubo-deployment
 ```
 
 The key is to pin the submodule to a particular commit or tag. Often deployment authors will create releases of their deployments and tag the releases. This creates a reference commit and associates a tag with the reference commit. If a release is not specified, you can just pin to the commit on master at the time you are creating your customized deployment.
@@ -34,14 +34,14 @@ The key is to pin the submodule to a particular commit or tag. Often deployment 
 > by commit hash
 
 ```bash
-cd submodules/github.com/cloudfoundry-incubator
+cd submodules/github.com/cloudfoundry-incubator/kubo-deployment
 git checout a291edc
 ```
 
 > or by tag
 
 ```bash
-cd submodules/github.com/cloudfoundry-incubator
+cd submodules/github.com/cloudfoundry-incubator/kubo-deployment
 git checkout v0.13.0
 ```
 
@@ -137,11 +137,11 @@ For an example of distinct release and deployment repos, see the [concourse depl
 To establish the dependency, we use the submodules command from above to create a dependency and then use the checkout command within the submodule directory to pin it to a specific version. 
 
 ```bash
-git submodule add https://github.com/cloudfoundry-community/vault-boshrelease/ submodules/github.com/cloudfoundry-community
+git submodule add https://github.com/cloudfoundry-community/vault-boshrelease/ submodules/github.com/cloudfoundry-community/vault-boshrelease
 ```
 
 ```bash
-cd submodules/github.com/cloudfoundry-community
+cd submodules/github.com/cloudfoundry-community/vault-boshrelease
 git checkout v0.7.0
 ```
 
