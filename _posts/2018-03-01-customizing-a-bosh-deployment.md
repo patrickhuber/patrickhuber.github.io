@@ -26,7 +26,7 @@ In order to follow the [modification principle](#modification-principle) and [de
 The commands for adding a submodule are pretty simple
 
 ```bash
-git submodule add https://github.com/cloudfoundry-incubator/kubo-deployment submodules/github.com/cloudfoundry-incubator
+git submodule add https://github.com/cloudfoundry-incubator/kubo-deployment submodules/github.com/cloudfoundry-incubator/kubo-deployment
 ```
 
 The key is to pin the submodule to a particular commit or tag. Often deployment authors will create releases of their deployments and tag the releases. This creates a reference commit and associates a tag with the reference commit. If a release is not specified, you can just pin to the commit on master at the time you are creating your customized deployment.
@@ -34,18 +34,25 @@ The key is to pin the submodule to a particular commit or tag. Often deployment 
 > by commit hash
 
 ```bash
-cd submodules/github.com/cloudfoundry-incubator
-git checout a291edc
+cd submodules/github.com/cloudfoundry-incubator/kubo-deployment
+git checkout a291edc
 ```
 
 > or by tag
 
 ```bash
-cd submodules/github.com/cloudfoundry-incubator
+cd submodules/github.com/cloudfoundry-incubator/kubo-deployment
 git checkout v0.13.0
 ```
 
 For all intensive purposes, this is a version identifier that pins your deplendency which is great. The last thing we want is to take a dependency on the ever changing latest commit on master and get out of sync with the deployment development team. 
+
+When you come back to a repo later to do an upgrade, you'll need to run `git fetch` in order to get the latest tags. So lets say you want to upgrade to tag v0.14.0 in the example above. You would type:
+
+```bash
+git fetch
+git checkout v0.14.0
+```
 
 ### Configuration Server
 
