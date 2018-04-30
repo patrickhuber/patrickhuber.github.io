@@ -144,15 +144,21 @@ For an example of distinct release and deployment repos, see the [concourse depl
 To establish the dependency, we use the submodules command from above to create a dependency and then use the checkout command within the submodule directory to pin it to a specific version. 
 
 ```bash
-git submodule add https://github.com/cloudfoundry-community/vault-boshrelease/ submodules/github.com/cloudfoundry-community
+git submodule add https://github.com/cloudfoundry-community/vault-boshrelease/ submodules/github.com/cloudfoundry-community/vault-boshrelease
 ```
 
 ```bash
-cd submodules/github.com/cloudfoundry-community
+cd submodules/github.com/cloudfoundry-community/vault-boshrelease
 git checkout v0.7.0
 ```
 
 I like to organize submodules by source control provider, org|user then repo (similar to how golang organizes dependencies), though you can use whatever scheme works for you.
+
+When you go to clone the repo on another machine, you will need to reinitialize the submodules using the following command: 
+
+```bash
+git submodule update --init --recursive
+```
 
 ### Work Loop
 

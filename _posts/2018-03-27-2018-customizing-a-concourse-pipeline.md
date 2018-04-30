@@ -6,7 +6,7 @@ When consuming a concourse pipeline like [pivotal-cf/pcf-pipelines](https://gith
 
 In BOSH we have the ability us use ops files built into the cli, but in fly we must use external tools to enable the same behavior. 
 
-If you go into the [pivotal-cf/pcf-pipelines customizing-the-pipelines](https://github.com/pivotal-cf/pcf-pipelines#customizing-the-pipelines) repo's README.md you will see the callout for customizing the pipelines with [yaml_patch](https://github.com/pivotal-cf/yaml-patch). We can also use the [bosh cli](https://github.com/cloudfoundry/bosh-cli/releases) to perform patching operations with the `bosh int` command. Because we most likely already have the bosh command I'll be using that to patch pipelines.
+If you go into the [pivotal-cf/pcf-pipelines customizing-the-pipelines](https://github.com/pivotal-cf/pcf-pipelines#customizing-the-pipelines) repo's README.md you will see the callout for customizing the pipelines with [yaml_patch](https://github.com/pivotal-cf/yaml-patch). You may be tempted to use the bosh cli's interpolation command `bosh int` because you already have the CLI locally. Avoid this tempation because `bosh int` does not handle the double curly brace variable definition in concourse pipelines. 
 
 ## Principles
 
@@ -215,8 +215,26 @@ Assuming the deployment name and environment name match the path, bosh will pick
 
 ### Shell Scripts
 
-
+Each pipeline we deploy will have its own shell script.
 
 ### Operations Files
+
+Along with `bosh int` or `yaml_patch` yaml patches can be used to customize pipelines. We will be placing all operations files in a directory called 'ops' at the root of our repository. It is a best practice to name operations files after what they accomplish. Don't be afraid to hard code values that are invariant across environments and don't contain secrets. For values that vary between environments, patch in a variable and set the variable in a vars file or via the CLI. 
+
+All examples will use the Stark and Wayne [concourse tutorial](https://github.com/starkandwayne/concourse-tutorial).
+
+#### Replace Text in Pipeline
+
+> ops/say-hello-patch.yml
+
+```yaml
+- op: replace
+  path: /jobs/name=job-hello-world/plan/config/run/args
+  value: [hello patch]
+```
+
+```bash
+fly set-pipeline -t main -p say-hello -c <(cat submodules/github.com/concourse-toutorial/tutorials/basic-pipeline/pipeline.yml | yaml_patch -o ops/say-hello-patch.yml)
+```
 
 ### Vars Files
