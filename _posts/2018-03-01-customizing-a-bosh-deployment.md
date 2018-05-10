@@ -35,7 +35,11 @@ The key is to pin the submodule to a particular commit or tag. Often deployment 
 
 ```bash
 cd submodules/github.com/cloudfoundry-incubator/kubo-deployment
+<<<<<<< HEAD
 git checkout a291edc
+=======
+git checout a291edc
+>>>>>>> d0a3978996c84254f1796ab2379c7e8040a0dc66
 ```
 
 > or by tag
