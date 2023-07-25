@@ -12,13 +12,13 @@ Go does not have an explicit enum type. Instead users are guided to create a typ
 ```go
 type Day int
 const (
-	Monday Day = iota
-	Tuesday
-	Wednesday
-	Thursday
-	Friday
-	Saturday
-	Sunday
+    Monday Day = iota
+    Tuesday
+    Wednesday
+    Thursday
+    Friday
+    Saturday
+    Sunday
 )
 ```
 
@@ -56,6 +56,26 @@ Usage in the same namespace:
 
 ```go
 var day = Day.Monday;
+```
+
+Rust has a different resolution operator, but the result is the same
+
+```
+enum Day {
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
+    Sunday,
+}
+```
+
+Usage is scoped with the `::` operator
+
+```
+Day::Monday
 ```
 
 It is often mentiond that packages are the unit of encapsulation in go, not structs. Indeed, when creating a struct, using the lower case prefix sets its visibility to private outside the package. 
