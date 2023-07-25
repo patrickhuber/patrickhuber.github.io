@@ -293,7 +293,7 @@ func IsListI32(v Value) bool{
 We now have the ability to model tagged unions so we can apply this to common tagged unions in other languages. First on the list is the Result[TValue, TError] type used to represent if a value is Ok or Error. This tagged union is part of the standard library in rust, so if you have used that language you have probably used it frequently. Idiomatic go represents a result using Tuple semantics but without first class Tuple support. For example, to return an value or an error we can do the following:
 
 ```go
-func ReturnsSomethingOrError() (int, error){
+func ReturnsSomethingOrError() (int, error) {
    return 0, nil
 }
 ```
@@ -301,7 +301,7 @@ func ReturnsSomethingOrError() (int, error){
 The tuple here can be used at the call site with another tuple deconstructing the function return values
 
 ```go
-func CallReturnSomethingOrError(){
+func CallReturnSomethingOrError() {
    v, err := ReturnSomethingOrError()
    if err != nil{
       fmt.Println(err)
@@ -311,7 +311,55 @@ func CallReturnSomethingOrError(){
 }
 ```
 
-This is the extent of the result type. You can use it as a signature of a function or in multiple assignments, but you can't pass it around as a value. What if we want to use the output in a channel? We would need two channels. One for the error and one for the success. 
+This is the extent of the result type in go. You can use it as a signature of a function or in multiple assignments, but you can't pass it around as a value. What if we want to use the output in a channel? We would need two channels. One for the error and one for the success. 
+
+Using go generics and the tagged union concepts from above, we can create a tagged union of types. One type will be called Ok, and represents a success. The other will be called Error and represents a failure. In go there is an idiomatic error type defined as an interface so we don't necessarily need to represent a result as Result[TOk, TError], but we could. 
+
+```go
+type Result[T any] interface{
+    result(t T)
+    IsError() bool
+    IsOk() bool
+}
+```
+
+The Ok type implements the result type but only exposes a successful value.
+
+```go
+type Ok[T any] struct{
+    Value T
+}
+
+func (Ok[T]) result(t T){}
+
+func (Ok[T]) IsOk() bool{
+   return true
+}
+
+func (Ok[T]) IsError() bool {
+   return false
+}
+```
+
+The Error type implements the result type but only exposes an error.
+
+```go
+type Error[T any] struct{
+    Error error
+}
+
+func (Error[T]) result(t T){}
+
+func (Error[T]) IsOk() bool {
+    return false
+}
+
+func (Error[T]) IsError() bool {
+    return true
+}
+```
+
+A full example of the Result type can be found in my [types library](https://github.com/patrickhuber/go-types) 
 
 ## Option
 
