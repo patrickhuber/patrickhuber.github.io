@@ -35,7 +35,7 @@ day := Monday
 ```
 
 Making the enum values constants in the package has a side effect of reserving the name so it can not be used in other structs, interfaces etc in the same package. 
-This often results in go authors prefixing or suffixing these constants to distinguish them from other "enums" in the same package. 
+This often results in go developers prefixing or suffixing these constants to distinguish them from other "enums" in the same package. 
 
 C# solves this problem by using the enumeration followed by a period(.) followed by the value. 
 
@@ -58,10 +58,24 @@ Usage in the same namespace:
 var day = Day.Monday;
 ```
 
-
 It is often mentiond that packages are the unit of encapsulation in go, not structs. Indeed, when creating a struct, using the lower case prefix sets its visibility to private outside the package. 
 
-Given this notion, 
+Given this notion, the pattern I use for enumerations is to scope them to an isolated package. That isolated package is usually part of a sub folder within the package where I need to use the enumeration. 
+
+An example of this can be seen in the `kind` package of the [go-wasm library](https://github.com/patrickhuber/go-wasm/blob/main/abi/kind/kind.go). I also use the stringer generator to generate string names for the type. 
+
+When I use the type in the abi package, using the enumeration results in code like the following:
+
+```go
+switch k {
+case kind.U32:  
+case kind.U64:  
+case kind.Float32:
+case kind.Float64:
+}
+```
+
+Using the package scope allows the calling code to resolve the enumerator without having to make the constant names U32Kind, KindU32 etc. 
 
 # Tagged Unions
 
