@@ -10,28 +10,26 @@ I ran into various issues modeling the ideas of the wasm type system and wasm co
 Go does not have an explicit enum type. Instead users are guided to create a type system with constants. 
 
 ```go
-type Day int
+type Kind int
+
 const (
-    Monday Day = iota
-    Tuesday
-    Wednesday
-    Thursday
-    Friday
-    Saturday
-    Sunday
+    U32 Kind = iota
+    U64
+    Float32
+    Float64
 )
 ```
 
 usage in the same package
 
 ```go
-var day Day = Monday
+var k Kind = U32
 ```
 
 or 
 
 ```go
-day := Monday
+k := U32
 ```
 
 Making the enum values constants in the package has a side effect of reserving the name so it can not be used in other structs, interfaces etc in the same package. 
@@ -40,42 +38,36 @@ This often results in go developers prefixing or suffixing these constants to di
 C# solves this problem by using the enumeration followed by a period(.) followed by the value. 
 
 ```csharp
-public enum Day
+public enum Kind
 { 
-    Monday,
-    Tuesday,
-    Wednesday,
-    Thursday,
-    Friday,
-    Saturday,
-    Sunday,
+    U32,
+    U64,
+    F32,
+    F64,
 }
 ```
 
 Usage in the same namespace:
 
 ```go
-var day = Day.Monday;
+var kind = Kind.U32;
 ```
 
 Rust has a different resolution operator, but the result is the same
 
 ```rust
-enum Day {
-    Monday,
-    Tuesday,
-    Wednesday,
-    Thursday,
-    Friday,
-    Saturday,
-    Sunday,
+enum Kind {
+    U32,
+    U64,
+    F32,
+    F64,
 }
 ```
 
 Usage is scoped with the `::` operator
 
 ```rust
-Day::Monday
+Kind::U32
 ```
 
 It is often mentiond that packages are the unit of encapsulation in go, not structs. Indeed, when creating a struct, using the lower case prefix sets its visibility to private outside the package. 
@@ -100,24 +92,22 @@ Using the package scope allows the calling code to resolve the enumerator withou
 Applying this to our example above results in the following:
 
 ```go
-package day
+package kind      // put the enum in its own package
 
-type Day int
+type Kind int
+
 const (
-    Monday Day = iota
-    Tuesday
-    Wednesday
-    Thursday
-    Friday
-    Saturday
-    Sunday
+    U32 Kind = iota
+    U64
+    Float32
+    Float64
 )
 ```
 
 We would then us the type in other packages by utilizing the import
 
 ```go
-day.Monday
+kind.U32
 ```
 
 # Tagged Unions
@@ -129,6 +119,41 @@ numtype ::= i32 | i64 | f32 | f64
 vectype ::= v128
 reftype ::= funcref | externref
 valtype ::= numtype | vectype | reftype
+```
+
+At first I tried to model hierarchies with composition, but ended up with a lot of null fields on structs. For example, to model the wasm number types, vec types and ref types with composition, you end up with a huge struct with a lot of pointer fields which result in added space to the struct. For small use cases this may not matter, but it is a lot of wasted memory created for a struct that is mostly nil pointers.
+
+```go
+type I32 struct{}
+type I64 struct{}
+type F32 struct{}
+type F64 struct{}
+type VecType struct{}
+type NumType struct{
+   I32 *I32
+   I64 *I64
+   F32 *F32
+   F64 *F64
+}
+type ValType struct{
+   NumType *NumType
+   RefType *RefType
+}
+```
+
+I also found using the types very difficult. There was a lot of nil checking required. For example, to see if a ValType is a F32 you need to do the following:
+
+```
+func SomeFunction(v *ValType) error {
+   if v.NumType == nil {
+       return fmt.Errorf("ValType is not a NumType")
+   }
+   nt := v.NumType
+   if nt.F32 == nil {
+       return fmt.Errorf("ValType is not a F32")
+   }
+   // do something with the f32
+}
 ```
 
 The go authors themselves even run into challenges where a type system hierarchy makes the programming task much easier https://cs.opensource.google/go/go/+/master:src/go/ast/ast.go;l=14 and are the source of the sealed interface pattern. 
@@ -158,9 +183,6 @@ type Decl interface {
 	declNode()
 }
 ```
-
-At first I tried to model hierarchies with composition, but ended up with a lot of null fields on structs. For example, to model the wasm number types, vec types and ref types with composition, you end up with a huge struct with a lot of pointer fields.
-
 
 ## Result
 
