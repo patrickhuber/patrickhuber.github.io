@@ -13,8 +13,8 @@ Go does not have an explicit enum type. Instead developers are guided to create 
 type Kind int
 
 const (
-    U32 Kind = iota
-    U64
+    I32 Kind = iota
+    I64
     Float32
     Float64
 )
@@ -23,13 +23,13 @@ const (
 usage in the same package
 
 ```go
-var k Kind = U32
+var k Kind = I32
 ```
 
 or 
 
 ```go
-k := U32
+k := I32
 ```
 
 Making the enum values constants in the package has a side effect of reserving the name so it can not be used in other structs, interfaces etc in the same package. 
@@ -40,8 +40,8 @@ C# solves this problem by using the enumeration followed by a period(.) followed
 ```csharp
 public enum Kind
 { 
-    U32,
-    U64,
+    I32,
+    I64,
     F32,
     F64,
 }
@@ -50,15 +50,15 @@ public enum Kind
 Usage in the same namespace:
 
 ```go
-var kind = Kind.U32;
+var kind = Kind.I32;
 ```
 
 Rust has a different resolution operator, but the result is the same
 
 ```rust
 enum Kind {
-    U32,
-    U64,
+    I32,
+    I64,
     F32,
     F64,
 }
@@ -67,7 +67,7 @@ enum Kind {
 Usage is scoped with the `::` operator
 
 ```rust
-Kind::U32
+Kind::I32
 ```
 
 It is often mentiond that packages are the unit of encapsulation in go, not structs. Indeed, when creating a struct, using the lower case prefix sets its visibility to private outside the package. 
@@ -80,14 +80,14 @@ When I use the type in the abi package, using the enumeration results in code li
 
 ```go
 switch k {
-case kind.U32:  
-case kind.U64:  
+case kind.I32:  
+case kind.I64:  
 case kind.Float32:
 case kind.Float64:
 }
 ```
 
-Using the package scope allows the calling code to resolve the enumerator without having to make the constant names U32Kind, KindU32 etc.
+Using the package scope allows the calling code to resolve the enumerator without having to make the constant names I32Kind, KindI32 etc.
 
 Applying this to our example above results in the following:
 
@@ -97,8 +97,8 @@ package kind      // put the enum in its own package
 type Kind int
 
 const (
-    U32 Kind = iota
-    U64
+    I32 Kind = iota
+    I64
     Float32
     Float64
 )
@@ -107,7 +107,7 @@ const (
 We would then us the type in other packages by utilizing the import
 
 ```go
-kind.U32
+kind.I32
 ```
 
 # Tagged Unions
@@ -278,8 +278,12 @@ type List struct{
 func (List) value() {}
 func (List) collection(){}
 
-func IsList(v Value) bool{
-   _, ok := v.(List)
+func IsListI32(v Value) bool{
+   l, ok := v.(List)
+   if !ok{
+       return false
+   }
+   _, ok := l.Type.(I32)
    return ok
 }
 ```
