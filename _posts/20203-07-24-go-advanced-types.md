@@ -3,7 +3,7 @@
 I've been musing about type systems in go and creating libraries and patterns that I feel fill gaps in the language. 
 
 This article serves as documentation of what I've discovered as well as a foundation of material I use in my wasm experimentation library [here](https://github.com/patrickhuber/go-wasm). 
-I ran into various issues modeling the ideas of the wasm type system and wasm component model in go. Utilizing the ideas in this article, I was able to create better representations that I felt better captured the domain.
+I ran into various issues modeling the ideas of the wasm type system and wasm component model in go. Utilizing the ideas in this article, I was able to create better representations that I felt did a better job capturing the domain.
 
 # Enums
 
