@@ -307,7 +307,7 @@ func CallReturnSomethingOrError(){
 }
 ```
 
-But what if we want to represent a tuple using generics? 
+This is the extent of the result type. You can use it as a signature of a function or in multiple assignments, but you can't pass it around as a value. What if we want to use the output in a channel? We would need two channels. One for the error and one for the success. 
 
 ## Option
 
