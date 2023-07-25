@@ -286,6 +286,29 @@ func IsList(v Value) bool{
 
 ## Result
 
+We now have the ability to model tagged unions so we can apply this to common tagged unions in other languages. First on the list is the Result[TValue, TError] type used to represent if a value is Ok or Error. This tagged union is part of the standard library in rust, so if you have used that language you have probably used it frequently. Idiomatic go represents a result using Tuple semantics but without first class Tuple support. For example, to return an value or an error we can do the following:
+
+```go
+func ReturnsSomethingOrError() (int, error){
+   return 0, nil
+}
+```
+
+The tuple here can be used at the call site with another tuple deconstructing the function return values
+
+```go
+func CallReturnSomethingOrError(){
+   v, err := ReturnSomethingOrError()
+   if err != nil{
+      fmt.Println(err)
+   }else{
+      fmt.Println(v)
+   }
+}
+```
+
+But what if we want to represent a tuple using generics? 
+
 ## Option
 
 # Tuples
