@@ -95,11 +95,71 @@ case kind.Float64:
 }
 ```
 
-Using the package scope allows the calling code to resolve the enumerator without having to make the constant names U32Kind, KindU32 etc. 
+Using the package scope allows the calling code to resolve the enumerator without having to make the constant names U32Kind, KindU32 etc.
+
+Applying this to our example above results in the following:
+
+```go
+package day
+
+type Day int
+const (
+    Monday Day = iota
+    Tuesday
+    Wednesday
+    Thursday
+    Friday
+    Saturday
+    Sunday
+)
+```
+
+We would then us the type in other packages by utilizing the import
+
+```go
+day.Monday
+```
 
 # Tagged Unions
 
-Go does not have a tagged 
+Go does not have a tagged union type, but it does have structs and interface. The general consensus is to favor composition over inheritance, but it is difficult to transition a clear type system like the wasm spec without some kind of type hierarchy. You can see the scope of what I'm talking about here: https://webassembly.github.io/spec/core/syntax/types.html.
+
+```ebnf
+numtype ::= i32 | i64 | f32 | f64
+vectype ::= v128
+reftype ::= funcref | externref
+valtype ::= numtype | vectype | reftype
+```
+
+The go authors themselves even run into challenges where a type system hierarchy makes the programming task much easier https://cs.opensource.google/go/go/+/master:src/go/ast/ast.go;l=14 and are the source of the sealed interface pattern. 
+
+```
+// All node types implement the Node interface.
+type Node interface {
+	Pos() token.Pos // position of first character belonging to the node
+	End() token.Pos // position of first character immediately after the node
+}
+
+// All expression nodes implement the Expr interface.
+type Expr interface {
+	Node
+	exprNode()
+}
+
+// All statement nodes implement the Stmt interface.
+type Stmt interface {
+	Node
+	stmtNode()
+}
+
+// All declaration nodes implement the Decl interface.
+type Decl interface {
+	Node
+	declNode()
+}
+```
+
+At first I tried to model hierarchies with composition, but ended up with a lot of null fields on structs. For example, to model the wasm number types, vec types and ref types with composition, you end up with a huge struct with a lot of pointer fields.
 
 
 ## Result
