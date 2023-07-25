@@ -7,7 +7,7 @@ I ran into various issues modeling the ideas of the wasm type system and wasm co
 
 # Enums
 
-Go does not have an explicit enum type. Instead users are guided to create a type system with constants. 
+Go does not have an explicit enum type. Instead developers are guided to create a type system with constants. 
 
 ```go
 type Kind int
@@ -135,9 +135,14 @@ type NumType struct{
    F32 *F32
    F64 *F64
 }
+type RefType struct{
+    FuncRef *FuncRef
+    ExternRef *ExternRef
+}
 type ValType struct{
    NumType *NumType
    RefType *RefType
+   VecType *VecType
 }
 ```
 
@@ -156,9 +161,13 @@ func SomeFunction(v *ValType) error {
 }
 ```
 
-The go authors themselves even run into challenges where a type system hierarchy makes the programming task much easier https://cs.opensource.google/go/go/+/master:src/go/ast/ast.go;l=14 and are the source of the sealed interface pattern. 
+In other languages, you can do a type check to see if the type is of a specific sub type. For example, rust has [pattern matching](https://doc.rust-lang.org/book/ch18-03-pattern-syntax.html#destructuring-enums) and C# has the [is operator](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/is). 
 
-```
+Go also has type matching, but you need to model the system in a different way in order for it to work. For example, using struct embedding is just another version of what we have above and will not work with type switches.
+
+The go authors themselves even run into challenges where a type system hierarchy makes the programming task much easier https://cs.opensource.google/go/go/+/master:src/go/ast/ast.go;l=14 and are the source of the sealed interface pattern.
+
+```go
 // All node types implement the Node interface.
 type Node interface {
 	Pos() token.Pos // position of first character belonging to the node
@@ -182,6 +191,62 @@ type Decl interface {
 	Node
 	declNode()
 }
+```
+
+Applying this pattern to our wasm type example above, we end up with the following structure:
+
+```go
+type Value interface {
+    value()
+}
+
+type Number interface {
+    Value()
+    number()
+}
+
+type Vec interface{
+    Value()
+    vec()
+}
+
+type Ref interface{
+    Value()
+    ref()
+}
+
+// Number types
+type I32 struct{}
+
+func (I32) number() {}
+func (I32) value()  {}
+
+type I64 struct{}
+
+func (I64) number() {}
+func (I64) value()  {}
+
+type F32 struct{}
+
+func (F32) number() {}
+func (F32) value()  {}
+
+type F64 struct{}
+
+func (F64) number() {}
+func (F64) value()  {}
+
+// Vec types
+type V128 struct{}
+func (V128) value() {}
+func (V128) vec() {}
+
+// Ref Types
+type FuncRef struct{}
+func (FuncRef) ref()
+
+type ExternRef struct{}
+func (ExternRef) ref()
 ```
 
 ## Result
