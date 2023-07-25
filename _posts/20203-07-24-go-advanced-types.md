@@ -193,6 +193,8 @@ type Decl interface {
 }
 ```
 
+The sealed interface pattern defines a private member function on a public interface. Structs of the same package are the only structs that can implement the interface member so you end up with the ability to model inheritance without exposing nonsense methods as public memthods of the struct. 
+
 Applying this pattern to our wasm type example above, we end up with the following structure:
 
 ```go
