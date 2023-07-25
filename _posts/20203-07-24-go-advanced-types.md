@@ -165,7 +165,7 @@ In other languages, you can do a type check to see if the type is of a specific 
 
 Go also has type matching, but you need to model the system in a different way in order for it to work. For example, using struct embedding is just another version of what we have above and has all the same issues. 
 
-The go authors themselves even run into challenges where a type system hierarchy makes the programming task much easier https://cs.opensource.google/go/go/+/master:src/go/ast/ast.go;l=14 and are the source of the sealed interface pattern.
+The go authors even have places where a hierarchy makes the programming task much easier https://cs.opensource.google/go/go/+/master:src/go/ast/ast.go;l=14 and are the source of the sealed interface pattern.
 
 ```go
 // All node types implement the Node interface.
