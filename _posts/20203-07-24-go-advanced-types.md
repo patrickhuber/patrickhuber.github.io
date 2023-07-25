@@ -148,7 +148,7 @@ type ValType struct{
 
 I also found using the types very difficult. There was a lot of nil checking required. For example, to see if a ValType is a F32 you need to do the following:
 
-```
+```go
 func SomeFunction(v *ValType) error {
    if v.NumType == nil {
        return fmt.Errorf("ValType is not a NumType")
@@ -163,7 +163,7 @@ func SomeFunction(v *ValType) error {
 
 In other languages, you can do a type check to see if the type is of a specific sub type. For example, rust has [pattern matching](https://doc.rust-lang.org/book/ch18-03-pattern-syntax.html#destructuring-enums) and C# has the [is operator](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/is). 
 
-Go also has type matching, but you need to model the system in a different way in order for it to work. For example, using struct embedding is just another version of what we have above and will not work with type switches.
+Go also has type matching, but you need to model the system in a different way in order for it to work. For example, using struct embedding is just another version of what we have above and has all the same issues. 
 
 The go authors themselves even run into challenges where a type system hierarchy makes the programming task much easier https://cs.opensource.google/go/go/+/master:src/go/ast/ast.go;l=14 and are the source of the sealed interface pattern.
 
@@ -243,10 +243,43 @@ func (V128) vec() {}
 
 // Ref Types
 type FuncRef struct{}
-func (FuncRef) ref()
+func (FuncRef) value(){}
+func (FuncRef) ref() {}
 
 type ExternRef struct{}
-func (ExternRef) ref()
+func (ExternRef) value() {}
+func (ExternRef) ref() {}
+```
+
+With the above model, we have eliminated the need for null checks and removed the wasted space taken by unused pointers. In our function example above, we can change it to use a type switch or type assertion:
+
+```go
+func SomeFunction(v Value) error {
+   f32, ok := v.(F32)
+   if !ok{
+      return fmt.Errorf("ValType is not a F32")
+   }
+   // do something with the f32
+}
+```
+
+We only represented a tagged union above using a simple hierarchy, when using type assertion or type switches you get access to the underlying type of the assertion. So we could also access member fields. For example, if we created a List struct, we could add a Type field to represent a list of items of a specific type.
+
+```go
+type Collection interface{
+   Value
+   collection()
+}
+type List struct{
+   Type Value
+}
+func (List) value() {}
+func (List) collection(){}
+
+func IsList(v Value) bool{
+   _, ok := v.(List)
+   return ok
+}
 ```
 
 ## Result
