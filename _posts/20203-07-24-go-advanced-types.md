@@ -60,7 +60,7 @@ var day = Day.Monday;
 
 Rust has a different resolution operator, but the result is the same
 
-```
+```rust
 enum Day {
     Monday,
     Tuesday,
@@ -74,7 +74,7 @@ enum Day {
 
 Usage is scoped with the `::` operator
 
-```
+```rust
 Day::Monday
 ```
 
