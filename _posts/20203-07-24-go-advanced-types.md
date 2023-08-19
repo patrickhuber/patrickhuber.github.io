@@ -408,7 +408,7 @@ m := map[string]string{}
 v, ok := m["hello"]
 ```
 
-Similar to the result type, go is using tuple sematics to respresent tagged union. The same approach can be used for defining a type called `Option` that represents both states `Some[T] and None[T]`
+Similar to the result type, go is using tuple sematics to respresent tagged union. The same approach can be used for defining a type called `Option` that represents both states `Some[T]` and `None[T]`
 
 ```go
 type Option[T] interface{
