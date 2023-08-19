@@ -123,7 +123,7 @@ reftype ::= funcref | externref
 valtype ::= numtype | vectype | reftype
 ```
 
-At first I tried to model hierarchies with composition, but ended up with a lot of null fields on structs. For example, to model the wasm number types, vec types and ref types with composition, you end up with a huge struct with a lot of pointer fields which result in added space to the struct. For small use cases this may not matter, but it is a lot of wasted memory created for a struct that is mostly nil pointers.
+At first I tried to model hierarchies with composition, but ended up with a lot of null fields on structs. For example, to model the wasm number types, vec types and ref types with composition, you end up with a struct with a lot of pointer fields which result in added space to the struct. For small use cases this may not matter, but it is a lot of wasted memory created for a struct that is mostly nil pointers.
 
 ```go
 type I32 struct{}
@@ -285,9 +285,9 @@ func CallReturnSomethingOrError() {
 }
 ```
 
-This is the extent of the result type in go. You can use it as a signature of a function or in multiple assignments, but you can't pass it around as a value. What if we want to use the output in a channel? We would need two channels. One for the error and one for the success. 
+This is the extent of the result type in go. You can use it as a signature of a function or in multiple assignments, but you can't pass it around as a value. What if we want to use the output in a channel? We would need two channels, one for the error and one for the success. Another option would be to create a struct of channels or a channel of a struct. 
 
-Furthermore, the tuple sematics do not really represent the concept of "Error OR Value". Instead they model "Error AND Value". The developer expects that the function will return either value, but there is nothing stopping the implementer of the function from returning both. These cases are often exposed via documentation and the type system of go does not enforce this in any way. When the contract of a function requires deep understanding of implementation internals, consumers will need to be extra careful to handle the different cases. 
+Furthermore, return tuples do not really represent the concept of "Error OR Value". Instead they model "Error AND Value". The developer expects that the function will return either value, but there is nothing stopping the implementer of the function from returning both. These cases are often exposed via documentation and the type system of go does not enforce this in any way. When the contract of a function requires deep understanding of implementation internals, consumers will need to be extra careful to handle the different cases. 
 
 What can be done? Using go generics and the tagged union concepts from above, we can create a tagged union of types. One type will be called Ok, and represents a success. The other will be called Error and represents a failure. In go there is an idiomatic error type defined as an interface so we don't necessarily need to represent a result as Result[TOk, TError], but we could. 
 
@@ -334,6 +334,8 @@ func (Error[T]) IsError() bool {
     return true
 }
 ```
+
+Using a Result type avoids the issues of Tuple return where there is either a Value or an Error, not both. This provides a clear contract to the consumer that they will not be receiving both values and need to handle ambiguity when both values are returned. 
 
 A full example of the Result type can be found in my [types library](https://github.com/patrickhuber/go-types) 
 
