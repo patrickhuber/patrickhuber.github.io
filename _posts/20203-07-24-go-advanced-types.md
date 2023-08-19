@@ -321,7 +321,7 @@ The Error type implements the result type but only exposes an error.
 
 ```go
 type Error[T any] struct{
-    Error error
+    Value error
 }
 
 func (Error[T]) result(t T){}
@@ -335,10 +335,102 @@ func (Error[T]) IsError() bool {
 }
 ```
 
-Using a Result type avoids the issues of Tuple return where there is either a Value or an Error, not both. This provides a clear contract to the consumer that they will not be receiving both values and need to handle ambiguity when both values are returned. 
+Using a Result type avoids the issues of Tuple return where there is either a Value or an Error, not both. This provides a clear contract to the consumer that they will not be receiving both values and need to handle ambiguity when both values are returned. It also provides a value that can be passed around as a unit and composed using functions. 
 
-A full example of the Result type can be found in my [types library](https://github.com/patrickhuber/go-types) 
+For ease of use, two additional methods can be created to help with using the Result types in code. One allows for easy creating of a result from an existing Result and Error tuple. This function has variants for multiple return values, but the most common case is to have one value. 
+
+```go
+package result
+
+func New[T](t T, err error) Result[T]{
+   if err != nil{
+	return Error[T](err)
+   }
+   return Ok(t)
+}
+```
+
+So, lets say we want to create a result type from the `os.ReadFile` function https://pkg.go.dev/os#ReadFile. We can wrap the call to the function with the `result.New` call. One advantage of go multiple returns can be seen here where the function signature matches the return type, go will match them together. 
+
+```go
+func ReadFile(name string) Result[[]byte]{
+	return result.New(os.ReadFile(name))
+}
+```
+
+For deconstruction, a method can be added to the result interface called `Deconstruct`. Deconstruct takes the Error or Ok types and deconstructs them into their values. 
+
+```go
+type Result[T any] interface{
+	// rest of definition here
+	Deconstruct(T, error)
+}
+
+func (e Error[T]) Deconstruct() (T, error){
+	val zero T
+	return zero, e.Value
+}
+
+func (o Ok[T]) Deconstruct() (T, error){
+	return ok.Value, nil
+}
+```
+
+With these two methods we can now onramp and offramp from existing go functions
+
+```go
+// onramp
+res := ReadFile(name)
+
+// offramp
+content, err := res.Deconstruct()
+```
+
+A full example of the Result type can be found in my [types library](https://github.com/patrickhuber/go-types). It includes addidtional methods and a new error handling model that unwraps results instead of placing `if err != nil` checks after each return. 
 
 ## Option
+
+Another common pattern in go is to return a value and a bool that signifies if the value is something or nothing. When you assert a type, you can use this pattern as well as when you detect if a map contains a key. 
+
+```go
+var i int = 0
+
+// ok will be false because the type of i is int and not
+// float32
+f, ok := i.(float32)
+```
+
+```go
+m := map[string]string{}
+
+// ok will be false because our map doesn't contain the key
+// if the value was present, ok would be true
+v, ok := m["hello"]
+```
+
+Similar to the result type, go is using tuple sematics to respresent tagged union. The same approach can be used for defining a type called `Option` that represents both states `Some[T] and None[T]`
+
+```go
+type Option[T] interface{
+	option(t T)
+	IsSome() bool
+	IsNone() bool
+}
+```
+
+```go
+type Some[T any] struct{
+    Value T
+}
+
+func (Some[T]) option(t T){}
+```
+
+```go
+type None[T any] struct{
+}
+
+func (None[T]) option(t T){}
+```
 
 # Tuples
