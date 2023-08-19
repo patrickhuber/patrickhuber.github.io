@@ -68,7 +68,48 @@ func main() {
 Another issue, more difficult to solve, is the lack of exhaustive checking for all enum values. For example, nothing is preventing us from completely missing the `Blue` case in the following type switch. 
 
 ```go
+var c Color = Blue
+switch c{
+case Red:
+  fmt.Println("Red")
+case Green:
+  fmt.Println("Green")
+}
+```
 
+In this case, nothing is printed because we forgot to put a type switch in for the `Blue` case. Some languages have detection mechanisms to check switches like this for exhaustive checking. 
+
+Fortunately go has made it's AST available as a library in the https://pkg.go.dev/golang.org/x/tools/go/analysis package. The exaustive static check can be written as an analyzer and an examle can be found here https://github.com/nishanths/exhaustive. This analyzer will check for enum values in switch statements as well as in maps. 
+
+At the time of writing, the `exhaustive` analyzer doesn't support the pattern above. I did write a test using the idiomatic approach and it indeed works as expected.
+
+```go
+package main
+
+import "fmt"
+
+type Vehicle int
+
+const (
+	Car   Vehicle = 0
+	Truck Vehicle = 1
+	Van   Vehicle = 2
+)
+
+func main() {
+	var v Vehicle = Car
+	switch v {
+	case Truck:
+		fmt.Println("Truck")
+	case Van:
+		fmt.Println("Van")
+	}
+}
+```
+
+```bash
+exhaustive .
+main.go:36:2: missing cases in switch of type main.Vehicle: main.Car
 ```
 
 # Tagged Unions
@@ -126,37 +167,7 @@ In other languages, you can do a type check to see if the type is of a specific 
 
 Go also has type matching, but you need to model the system in a different way in order for it to work. For example, using struct embedding is just another version of what we have above and has all the same issues. 
 
-The go authors even have places where a hierarchy makes the programming task much easier https://cs.opensource.google/go/go/+/master:src/go/ast/ast.go;l=14 and are the source of the sealed interface pattern.
-
-```go
-// All node types implement the Node interface.
-type Node interface {
-	Pos() token.Pos // position of first character belonging to the node
-	End() token.Pos // position of first character immediately after the node
-}
-
-// All expression nodes implement the Expr interface.
-type Expr interface {
-	Node
-	exprNode()
-}
-
-// All statement nodes implement the Stmt interface.
-type Stmt interface {
-	Node
-	stmtNode()
-}
-
-// All declaration nodes implement the Decl interface.
-type Decl interface {
-	Node
-	declNode()
-}
-```
-
-The sealed interface pattern defines a private member function on a public interface. Structs of the same package are the only structs that can implement the interface member so you end up with the ability to model inheritance without exposing nonsense methods as public memthods of the struct. 
-
-Applying this pattern to our wasm type example above, we end up with the following structure:
+Again, the sealed interface pattern can be used to constrain the types.
 
 ```go
 type Value interface {
@@ -164,17 +175,17 @@ type Value interface {
 }
 
 type Number interface {
-    Value()
+    Value
     number()
 }
 
 type Vec interface{
-    Value()
+    Value
     vec()
 }
 
 type Ref interface{
-    Value()
+    Value
     ref()
 }
 
@@ -251,7 +262,9 @@ func IsListI32(v Value) bool{
 
 ## Result
 
-We now have the ability to model tagged unions so we can apply this to common tagged unions in other languages. First on the list is the Result[TValue, TError] type used to represent if a value is Ok or Error. This tagged union is part of the standard library in rust, so if you have used that language you have probably used it frequently. Idiomatic go represents a result using Tuple semantics but without first class Tuple support. For example, to return an value or an error we can do the following:
+We now have the ability to model tagged unions so we can apply this to common tagged unions in other languages. First on the list is the Result[TValue, TError] type used to represent if a value is Ok or Error. This tagged union is part of the standard library in rust, so if you have used that language you have probably used it frequently. 
+
+Idiomatic go represents a result using Tuple semantics but without first class Tuple support. For example, to return an value or an error we can do the following:
 
 ```go
 func ReturnsSomethingOrError() (int, error) {
@@ -274,7 +287,9 @@ func CallReturnSomethingOrError() {
 
 This is the extent of the result type in go. You can use it as a signature of a function or in multiple assignments, but you can't pass it around as a value. What if we want to use the output in a channel? We would need two channels. One for the error and one for the success. 
 
-Using go generics and the tagged union concepts from above, we can create a tagged union of types. One type will be called Ok, and represents a success. The other will be called Error and represents a failure. In go there is an idiomatic error type defined as an interface so we don't necessarily need to represent a result as Result[TOk, TError], but we could. 
+Furthermore, the tuple sematics do not really represent the concept of "Error OR Value". Instead they model "Error AND Value". The developer expects that the function will return either value, but there is nothing stopping the implementer of the function from returning both. These cases are often exposed via documentation and the type system of go does not enforce this in any way. When the contract of a function requires deep understanding of implementation internals, consumers will need to be extra careful to handle the different cases. 
+
+What can be done? Using go generics and the tagged union concepts from above, we can create a tagged union of types. One type will be called Ok, and represents a success. The other will be called Error and represents a failure. In go there is an idiomatic error type defined as an interface so we don't necessarily need to represent a result as Result[TOk, TError], but we could. 
 
 ```go
 type Result[T any] interface{
