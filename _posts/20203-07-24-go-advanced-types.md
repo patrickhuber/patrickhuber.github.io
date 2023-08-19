@@ -39,7 +39,7 @@ func main() {
 }
 ```
 
-One enhancement can be made to the color type to prevent this issue. We can change around our Color type from an alias to a public interface with a single private member function. This pattern enforces the type constraint of Color and prevents us from assigning unspecified values to the color type. Because the interface is sealed, the only impleentation of Color can be supplied by the package. You can see the compiler error here https://go.dev/play/p/HRPjEo82SXE
+One enhancement can be made to the color type to prevent this issue. We can change around our Color type from an alias to a public interface with a single private member function. This pattern enforces the type constraint of Color and prevents us from assigning unspecified values to the color type. Because the interface is sealed, the only implementation of Color can be supplied by the package. You can see the compiler error here https://go.dev/play/p/HRPjEo82SXE
 
 ```go
 package main
