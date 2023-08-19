@@ -167,7 +167,7 @@ In other languages, you can do a type check to see if the type is of a specific 
 
 Go also has type matching, but you need to model the system in a different way in order for it to work. For example, using struct embedding is just another version of what we have above and has all the same issues. 
 
-Again, the sealed interface pattern can be used to constrain the types.
+So what can be done? Again, the sealed interface pattern can be used to constrain the types. We will instead use the interface over a struct type which allows us to model a tagged union.
 
 ```go
 type Value interface {
