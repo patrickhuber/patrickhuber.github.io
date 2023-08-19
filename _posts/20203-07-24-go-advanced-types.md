@@ -20,94 +20,55 @@ const (
 )
 ```
 
-usage in the same package
+There are a few issues with this pattern, namely you can assign any integer to a Kind value and the compiler won't throw an error. This is due to `type Kind int` defining an alias for Kind, but not making it a new type. You can see this live here https://go.dev/play/p/fkiGltPxXn1
 
 ```go
-var k Kind = I32
-```
+package main
 
-or 
-
-```go
-k := I32
-```
-
-Making the enum values constants in the package has a side effect of reserving the name so it can not be used in other structs, interfaces etc in the same package. 
-This often results in go developers prefixing or suffixing these constants to distinguish them from other "enums" in the same package. 
-
-C# solves this problem by using the enumeration followed by a period(.) followed by the value. 
-
-```csharp
-public enum Kind
-{ 
-    I32,
-    I64,
-    F32,
-    F64,
-}
-```
-
-Usage in the same namespace:
-
-```go
-var kind = Kind.I32;
-```
-
-Rust has a different resolution operator, but the result is the same
-
-```rust
-enum Kind {
-    I32,
-    I64,
-    F32,
-    F64,
-}
-```
-
-Usage is scoped with the `::` operator
-
-```rust
-Kind::I32
-```
-
-It is often mentiond that packages are the unit of encapsulation in go, not structs. Indeed, when creating a struct, using the lower case prefix sets its visibility to private outside the package. 
-
-Given this notion, the pattern I use for enumerations is to scope them to an isolated package. That isolated package is usually part of a sub folder within the package where I need to use the enumeration. 
-
-An example of this can be seen in the `kind` package of the [go-wasm library](https://github.com/patrickhuber/go-wasm/blob/main/abi/kind/kind.go). I also use the stringer generator to generate string names for the type. 
-
-When I use the type in the abi package, using the enumeration results in code like the following:
-
-```go
-switch k {
-case kind.I32:  
-case kind.I64:  
-case kind.Float32:
-case kind.Float64:
-}
-```
-
-Using the package scope allows the calling code to resolve the enumerator without having to make the constant names I32Kind, KindI32 etc.
-
-Applying this to our example above results in the following:
-
-```go
-package kind      // put the enum in its own package
-
-type Kind int
+type Color string
 
 const (
-    I32 Kind = iota
-    I64
-    Float32
-    Float64
+	Red   Color = 0
+	Green Color = 1
+	Blue  Color = 2
 )
+
+func main() {
+	var carColor Color = 10
+	fmt.Printf("color : %v", carColor)
+}
 ```
 
-We would then us the type in other packages by utilizing the import
+One enhancement can be made to the color type to prevent this issue. We can change around our Color type from an alias to a public interface with a single private member function. This pattern enforces the type constraint of Color and prevents us from assigning unspecified values to the color type. Because the interface is sealed, the only impleentation of Color can be supplied by the package. You can see the compiler error here https://go.dev/play/p/HRPjEo82SXE
+
+```
+package main
+
+import "fmt"
+
+type Color interface {
+	color()
+}
+type color int
+
+func (color) color() {}
+
+const (
+	Red   color = 0
+	Green color = 1
+	Blue  color = 2
+)
+
+func main() {
+	var carColor Color = 10
+	fmt.Printf("color : %v", carColor)
+}
+```
+
+Another issue, more difficult to solve, is the lack of exhaustive checking for all enum values. For example, nothing is preventing us from completely missing the `Blue` case in the following type switch. 
 
 ```go
-kind.I32
+
 ```
 
 # Tagged Unions
