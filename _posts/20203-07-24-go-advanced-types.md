@@ -79,7 +79,7 @@ case Green:
 
 In this case, nothing is printed because we forgot to put a type switch in for the `Blue` case. Some languages have detection mechanisms to check switches like this for exhaustive checking. 
 
-Fortunately go has made it's AST available as a library in the https://pkg.go.dev/golang.org/x/tools/go/analysis package. The exaustive static check can be written as an analyzer and an examle can be found here https://github.com/nishanths/exhaustive. This analyzer will check for enum values in switch statements as well as in maps. 
+Fortunately go has made it's AST available as a library in the https://pkg.go.dev/golang.org/x/tools/go/analysis package. The exaustive static check can be written as an analyzer and an example can be found here https://github.com/nishanths/exhaustive. This analyzer will check for enum values in switch statements as well as in maps. 
 
 At the time of writing, the `exhaustive` analyzer doesn't support the pattern above. I did write a test using the idiomatic approach and it indeed works as expected.
 
