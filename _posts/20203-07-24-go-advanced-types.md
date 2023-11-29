@@ -20,6 +20,8 @@ const (
 )
 ```
 
+## assignment is not constrained
+
 There are a few issues with this pattern, namely you can assign any integer to a Kind value and the compiler won't throw an error. This is due to `type Kind int` defining an alias for Kind, but not making it a new type. You can see this live here https://go.dev/play/p/fkiGltPxXn1
 
 ```go
@@ -38,6 +40,8 @@ func main() {
 	fmt.Printf("color : %v", carColor)
 }
 ```
+
+## fixing assignment with sealed interface
 
 One enhancement can be made to the color type to prevent this issue. We can change around our Color type from an alias to a public interface with a single private member function. This pattern enforces the type constraint of Color and prevents us from assigning unspecified values to the color type. Because the interface is sealed, the only implementation of Color can be supplied by the package. You can see the compiler error here https://go.dev/play/p/HRPjEo82SXE
 
@@ -64,6 +68,8 @@ func main() {
 	fmt.Printf("color : %v", carColor)
 }
 ```
+
+## exhaustive search 
 
 Another issue, more difficult to solve, is the lack of exhaustive checking for all enum values. For example, nothing is preventing us from completely missing the `Blue` case in the following type switch. 
 
@@ -111,6 +117,8 @@ func main() {
 exhaustive .
 main.go:36:2: missing cases in switch of type main.Vehicle: main.Car
 ```
+
+## json marshal and unmarshal
 
 Because the solution above utilizes interfaces instead of primative types, json serialization becomes slightly more difficult. In order to enable Unmarshal and Marshal of the type we need to implement the `UnmarshallJSON(d []byte) error` and `MarshallJSON() ([]byte,error)` methods on the private struct. 
 
