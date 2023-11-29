@@ -112,6 +112,153 @@ exhaustive .
 main.go:36:2: missing cases in switch of type main.Vehicle: main.Car
 ```
 
+Because the solution above utilizes interfaces instead of primative types, json serialization becomes slightly more difficult. In order to enable Unmarshal and Marshal of the type we need to implement the `UnmarshallJSON(d []byte) error` and `MarshallJSON() ([]byte,error)` methods on the private struct. 
+
+When marshaling concrete type and to json, the type directly implements MarshallJSON and the json package can look up that method. 
+
+When unmarshaling json to an enum type the interface must define the UnmarshalJSON method, otherwise the json.Unmarshal invocation will throw an error.
+
+Modifying our color example above, we get the following code:
+
+```golang
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type Color interface {
+	color()
+	UnmarshalJSON(data []byte) error
+}
+
+type color string
+
+func (color) color() {}
+
+func (c color) String() string {
+	return string(c)
+}
+
+func (c *color) UnmarshalJSON(data []byte) error {
+	var s string
+	err := json.Unmarshal(data, &s)
+	if err != nil {
+		return err
+	}
+
+	switch s {
+	case Red.String():
+		*c = Red
+	case Blue.String():
+		*c = Blue
+	case Green.String():
+		*c = Green
+	}
+	return nil
+}
+
+func (c color) MarshallJSON() ([]byte, error) {
+	s := c.String()
+	return json.Marshal(s)
+}
+
+func (c color) Pointer() *color {
+	// c is a struct copy so returning this address
+	// returns the address of a pointer to a copy
+	return &c
+}
+
+const (
+	Red   color = "Red"
+	Green color = "Green"
+	Blue  color = "Blue"
+)
+
+func marshal() {
+	fmt.Println("marshal")
+	carColor := Red
+	b, err := json.Marshal(carColor)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("color json : %v", string(b))
+	fmt.Println()
+
+	blue := `"Blue"`
+	err = json.Unmarshal([]byte(blue), &carColor)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("color : %v", carColor)
+	fmt.Println()
+}
+
+func canSwitch() {
+	fmt.Println("can switch")
+	myColor := Blue
+	switch myColor {
+	case Red:
+		fmt.Printf("switch myColor %s", myColor)
+	case Blue:
+		fmt.Printf("switch myColor %s", myColor)
+	case Green:
+		fmt.Printf("switch myColor %s", myColor)
+	default:
+		fmt.Printf("failed to match color")
+	}
+	fmt.Println()
+}
+
+func partOfStruct() {
+	fmt.Println("part of struct")
+	type MyStruct struct {
+		Name  string `json:"name"`
+		Color Color  `json:"color"`
+	}
+
+	// pointer method required to get address of our const
+	myStruct := MyStruct{
+		Name:  "name",
+		Color: Red.Pointer(),
+	}
+
+	b, err := json.Marshal(myStruct)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(b))
+
+	s := `{"name":"name", "color": "Red"}`
+	err = json.Unmarshal([]byte(s), &myStruct)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("name: %s", myStruct.Name)
+	fmt.Println()
+
+	fmt.Printf("color: %s", myStruct.Color)
+	fmt.Println()
+
+}
+
+func main() {
+	marshal()
+	fmt.Println()
+
+	partOfStruct()
+	fmt.Println()
+
+	canSwitch()
+	fmt.Println()
+}
+```
+
+You can play with this in the go playground here https://go.dev/play/p/sxZWk-xT-_i
+
 # Tagged Unions
 
 Go does not have a tagged union type, but it does have structs and interface. The general consensus is to favor composition over inheritance, but it is difficult to transition a clear type system like the wasm spec without some kind of type hierarchy. You can see the scope of what I'm talking about here: https://webassembly.github.io/spec/core/syntax/types.html.
