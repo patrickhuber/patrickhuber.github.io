@@ -265,6 +265,8 @@ func main() {
 }
 ```
 
+> One point of note, when assigning a value to a struct, we are assigning a concrete value type `color` to an interface `Color` so we need to use a pointer. The pointer is required due to the implementation of the UnmarshalJSON method taking a pointer receiver. Because you can't take a pointer to a const, you need to instead take a pointer to a copied value. This can be done by using a value receiver and returning the reference to the copy provided there or by creating a shadown variable and taking it's pointer. In the example above I implemented the Pointer function which does the former. 
+
 You can play with this in the go playground here https://go.dev/play/p/sxZWk-xT-_i
 
 # Tagged Unions
