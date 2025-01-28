@@ -520,7 +520,7 @@ For deconstruction, a method can be added to the result interface called `Decons
 ```go
 type Result[T any] interface{
 	// rest of definition here
-	Deconstruct(T, error)
+	Deconstruct()(T, error)
 }
 
 func (e Error[T]) Deconstruct() (T, error){
