@@ -591,3 +591,38 @@ func (None[T]) option(t T){}
 ```
 
 # Tuples
+
+A tuple is essentially a struct with unnamed parameters. There are a few ways to create a tuple, for example:
+
+A plain go struct can be used:
+
+```go
+type Person struct{
+	name string
+	age int
+}
+person := Person{ name: "hello", age: 21 }
+```
+
+A anonymous struct can be used:
+
+```go
+person := struct {
+        name string
+        age  int
+}{
+	name: "Alice",
+        age:  30,
+}
+```
+
+A special generic type called Tuple could be used. This has the limitation of lacking named fields but can be used in composition where more generallity is needed. 
+
+```go
+type Tuple2[T1, T2 any] struct{	
+	Value1 T1
+	Value2 T2
+}
+```
+
+For more than 2 generic parameters, you would need a Tuple3, Tuple4, etc type.
